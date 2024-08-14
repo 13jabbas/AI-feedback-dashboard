@@ -17,7 +17,7 @@ import nltk
 @st.cache_data
 def load_data():
     df = pd.read_csv('LLMNER.csv')  # Modify path as needed
-    hallucinations = pd.read_csv('/path_to_data/Hallucination_Confidence_Score.csv')  # Modify path as needed
+    hallucinations = pd.read_csv('Hallucination Confidence Score (3).csv')  # Modify path as needed
     return df, hallucinations
 
 df, hallucinations = load_data()
