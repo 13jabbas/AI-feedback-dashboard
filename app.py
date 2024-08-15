@@ -21,7 +21,9 @@ df, hallucinations = load_data()
 
 # Streamlit Title and description
 st.title("LLM Performance Dashboard")
-st.write("This dashboard shows various metrics related to LLM predictions and hallucinations.")
+
+### Section 1: Entities and Metrics ###
+st.markdown("## Entity Metrics")
 
 # Micro F1 score, precision, recall, and ROC evaluation for each attribute
 def evaluate_metrics(df, columns_to_evaluate):
@@ -117,6 +119,10 @@ ax.set_ylabel('True Positive Rate')
 ax.set_title(f'ROC Curve for {selected_entity}')
 ax.legend(loc='lower right')
 st.pyplot(fig)
+
+### Section 2: Hallucinations ###
+st.markdown("---")  # Divider
+st.markdown("## Hallucinations Analysis")
 
 # Word Cloud for Hallucinations
 st.subheader("Word Cloud for Hallucinations")
