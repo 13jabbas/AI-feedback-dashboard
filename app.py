@@ -2,7 +2,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-
+import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, roc_curve
 from sklearn.preprocessing import label_binarize, LabelEncoder
