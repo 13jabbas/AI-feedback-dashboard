@@ -9,7 +9,7 @@ from wordcloud import WordCloud
 @st.cache_data
 def load_data():
     df = pd.read_csv('LLMNER.csv')  # Adjust the path
-    hallucinations = pd.read_csv('Hallucination Confidence Score.csv')  # Adjust the path
+    hallucinations = pd.read_csv('Hallucination Confidence Score (3).csv')  # Adjust the path
     return df, hallucinations
 
 df, hallucinations = load_data()
