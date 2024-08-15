@@ -1,4 +1,3 @@
-# Importing necessary libraries
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -10,6 +9,9 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from wordcloud import WordCloud
 
+# Set page configuration
+st.set_page_config(layout="wide")
+
 # Load data
 @st.cache_data
 def load_data():
@@ -19,19 +21,14 @@ def load_data():
 
 df, hallucinations = load_data()
 
-# Page Layout
-st.set_page_config(layout="wide")
-
 # Streamlit Title and description
 st.title("LLM Performance Dashboard")
 
-### Sidebar for entity selection ###
-st.sidebar.title("Entity Selection")
-columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
-selected_entity = st.sidebar.selectbox("Choose an entity", columns_to_evaluate)
+# Layout for the entities section with metrics
+st.header("Entity Metrics")
 
-### Section 1: Entities and Metrics ###
-st.markdown("## Entity Metrics")
+# Create a two-column layout
+col1, col2 = st.columns([1, 4])  # col1 for the dropdown, col2 for gauges and ROC curve
 
 # Micro F1 score, precision, recall, and ROC evaluation for each attribute
 def evaluate_metrics(df, columns_to_evaluate):
@@ -68,64 +65,66 @@ def evaluate_metrics(df, columns_to_evaluate):
     return results
 
 # Metrics evaluation
+columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
 results = evaluate_metrics(df, columns_to_evaluate)
-metrics = results[selected_entity]
+
+# Sidebar for dropdown selection
+with col1:
+    st.subheader("Select Entity to View Metrics")
+    selected_entity = st.selectbox("Choose an entity", columns_to_evaluate)
 
 # Display the metrics for the selected entity as gauges
-st.subheader(f"Metrics Gauges for {selected_entity}")
+with col2:
+    st.subheader(f"Metrics Gauges for {selected_entity}")
+    metrics = results[selected_entity]
 
-# Create gauges for each metric using Plotly with box-like appearance
-fig_gauges = make_subplots(rows=1, cols=4, 
-                           subplot_titles=["Micro F1 Score", "Precision", "Recall", "AUC"],
-                           specs=[[{'type': 'indicator'}] * 4])
+    # Create gauges for each metric using Plotly
+    fig_gauges = make_subplots(rows=1, cols=4, subplot_titles=["Micro F1 Score", "Precision", "Recall", "AUC"], specs=[[{'type': 'indicator'}] * 4])
 
-# Add border and background to the gauges
-def add_gauge_trace(fig, value, title, row, col, bar_color):
-    fig.add_trace(go.Indicator(
+    fig_gauges.add_trace(go.Indicator(
         mode="gauge+number",
-        value=value * 100,
-        title={'text': title, 'font': {'size': 14}},
-        gauge={
-            'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
-            'bar': {'color': bar_color},
-            'bgcolor': "white",
-            'borderwidth': 2,
-            'bordercolor': "gray",
-        }
-    ), row=row, col=col)
+        value=metrics['Micro F1 Score'] * 100,
+        title={'text': "Micro F1 Score"},
+        gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "darkblue"}}
+    ), row=1, col=1)
 
-# Add each gauge in its own "box"
-add_gauge_trace(fig_gauges, metrics['Micro F1 Score'], "Micro F1 Score", 1, 1, "darkblue")
-add_gauge_trace(fig_gauges, metrics['Precision'], "Precision", 1, 2, "green")
-add_gauge_trace(fig_gauges, metrics['Recall'], "Recall", 1, 3, "orange")
-add_gauge_trace(fig_gauges, metrics['AUC'], "AUC", 1, 4, "red")
+    fig_gauges.add_trace(go.Indicator(
+        mode="gauge+number",
+        value=metrics['Precision'] * 100,
+        title={'text': "Precision"},
+        gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "green"}}
+    ), row=1, col=2)
 
-# Update layout with better spacing and appearance
-fig_gauges.update_layout(
-    height=400, 
-    width=1200, 
-    margin=dict(l=20, r=20, t=40, b=20),
-    paper_bgcolor="lightgray",  # Optional background color for the whole plot
-    plot_bgcolor="white",
-    title_text=f"Accuracy Gauges for {selected_entity}"
-)
+    fig_gauges.add_trace(go.Indicator(
+        mode="gauge+number",
+        value=metrics['Recall'] * 100,
+        title={'text': "Recall"},
+        gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "orange"}}
+    ), row=1, col=3)
 
-st.plotly_chart(fig_gauges)
+    fig_gauges.add_trace(go.Indicator(
+        mode="gauge+number",
+        value=metrics['AUC'] * 100,
+        title={'text': "AUC"},
+        gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "red"}}
+    ), row=1, col=4)
 
-# Display ROC curve for selected entity
-st.subheader("ROC Curve")
-fig, ax = plt.subplots(figsize=(8, 6))
-ax.plot(metrics['FPR'], metrics['TPR'], label=f"{selected_entity} (AUC = {metrics['AUC']:.2f})")
-ax.plot([0, 1], [0, 1], 'k--', label="Random Guessing (AUC = 0.50)")
-ax.set_xlabel('False Positive Rate')
-ax.set_ylabel('True Positive Rate')
-ax.set_title(f'ROC Curve for {selected_entity}')
-ax.legend(loc='lower right')
-st.pyplot(fig)
+    fig_gauges.update_layout(height=400, width=1200, title_text=f"Accuracy Gauges for {selected_entity}")
+    st.plotly_chart(fig_gauges)
 
-### Section 2: Hallucinations ###
-st.markdown("---")  # Divider
-st.markdown("## Hallucinations Analysis")
+    # Display ROC curve for selected entity
+    st.subheader("ROC Curve")
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(metrics['FPR'], metrics['TPR'], label=f"{selected_entity} (AUC = {metrics['AUC']:.2f})")
+    ax.plot([0, 1], [0, 1], 'k--', label="Random Guessing (AUC = 0.50)")
+    ax.set_xlabel('False Positive Rate')
+    ax.set_ylabel('True Positive Rate')
+    ax.set_title(f'ROC Curve for {selected_entity}')
+    ax.legend(loc='lower right')
+    st.pyplot(fig)
+
+# Add another section for hallucinations
+st.header("Hallucinations Analysis")
 
 # Word Cloud for Hallucinations
 st.subheader("Word Cloud for Hallucinations")
