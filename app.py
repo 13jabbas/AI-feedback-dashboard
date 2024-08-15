@@ -17,7 +17,7 @@ def load_data():
     hallucinations = pd.read_csv('Hallucination Confidence Score (3).csv')  # Modify path as needed
     return df, hallucinations
 
-df, hallucin00ations = load_data()
+df, hallucinations = load_data()
 
 # Page Layout
 st.set_page_config(layout="wide")
