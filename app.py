@@ -1,4 +1,3 @@
-# Importing necessary libraries
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -72,53 +71,68 @@ metrics = results[selected_entity]
 # Create gauges for each metric using Plotly
 fig_gauges = make_subplots(rows=1, cols=4, subplot_titles=["Micro F1 Score", "Precision", "Recall", "AUC"], specs=[[{'type': 'indicator'}] * 4])
 
+# Set dark mode colors for gauges
+gauge_colors = {
+    'bg_color': '#0e1117',
+    'bar_color': {
+        'Micro F1 Score': 'darkblue',
+        'Precision': 'green',
+        'Recall': 'orange',
+        'AUC': 'red'
+    }
+}
+
 fig_gauges.add_trace(go.Indicator(
     mode="gauge+number",
     value=metrics['Micro F1 Score'] * 100,
-    title={'text': "Micro F1 Score"},
-    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "darkblue"}}
+    title={'text': "Micro F1 Score", 'font': {'color': 'white'}},
+    gauge={'axis': {'range': [0, 100], 'tickcolor': 'white'}, 'bar': {'color': gauge_colors['bar_color']['Micro F1 Score']}, 'bgcolor': gauge_colors['bg_color']}
 ), row=1, col=1)
 
 fig_gauges.add_trace(go.Indicator(
     mode="gauge+number",
     value=metrics['Precision'] * 100,
-    title={'text': "Precision"},
-    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "green"}}
+    title={'text': "Precision", 'font': {'color': 'white'}},
+    gauge={'axis': {'range': [0, 100], 'tickcolor': 'white'}, 'bar': {'color': gauge_colors['bar_color']['Precision']}, 'bgcolor': gauge_colors['bg_color']}
 ), row=1, col=2)
 
 fig_gauges.add_trace(go.Indicator(
     mode="gauge+number",
     value=metrics['Recall'] * 100,
-    title={'text': "Recall"},
-    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "orange"}}
+    title={'text': "Recall", 'font': {'color': 'white'}},
+    gauge={'axis': {'range': [0, 100], 'tickcolor': 'white'}, 'bar': {'color': gauge_colors['bar_color']['Recall']}, 'bgcolor': gauge_colors['bg_color']}
 ), row=1, col=3)
 
 fig_gauges.add_trace(go.Indicator(
     mode="gauge+number",
     value=metrics['AUC'] * 100,
-    title={'text': "AUC"},
-    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "red"}}
+    title={'text': "AUC", 'font': {'color': 'white'}},
+    gauge={'axis': {'range': [0, 100], 'tickcolor': 'white'}, 'bar': {'color': gauge_colors['bar_color']['AUC']}, 'bgcolor': gauge_colors['bg_color']}
 ), row=1, col=4)
 
-fig_gauges.update_layout(height=400, width=1200, title_text=f"Accuracy Gauges for {selected_entity}")
+fig_gauges.update_layout(height=400, width=1200, paper_bgcolor='#0e1117', plot_bgcolor='#0e1117', title_text=f"Accuracy Gauges for {selected_entity}", font={'color': 'white'})
 st.plotly_chart(fig_gauges)
 
 # Display ROC curve for selected entity
 st.subheader("ROC Curve")
 fig, ax = plt.subplots(figsize=(8, 6))
-ax.plot(metrics['FPR'], metrics['TPR'], label=f"{selected_entity} (AUC = {metrics['AUC']:.2f})")
-ax.plot([0, 1], [0, 1], 'k--', label="Random Guessing (AUC = 0.50)")
-ax.set_xlabel('False Positive Rate')
-ax.set_ylabel('True Positive Rate')
-ax.set_title(f'ROC Curve for {selected_entity}')
-ax.legend(loc='lower right')
+ax.plot(metrics['FPR'], metrics['TPR'], label=f"{selected_entity} (AUC = {metrics['AUC']:.2f})", color='cyan')
+ax.plot([0, 1], [0, 1], 'k--', label="Random Guessing (AUC = 0.50)", color='grey')
+ax.set_facecolor('#0e1117')
+ax.set_xlabel('False Positive Rate', color='white')
+ax.set_ylabel('True Positive Rate', color='white')
+ax.set_title(f'ROC Curve for {selected_entity}', color='white')
+ax.legend(loc='lower right', facecolor='#262730')
+ax.spines['bottom'].set_color('white')
+ax.spines['left'].set_color('white')
+ax.tick_params(colors='white')
 st.pyplot(fig)
 
-# Word Cloud for Hallucinations
+# Word Cloud for Hallucinations with dark theme
 st.subheader("Word Cloud for Hallucinations")
 new_df = hallucinations[hallucinations['Keyword Match Count'] == 0]
 text = ' '.join(new_df['Description'].astype(str))
-wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='Set2').generate(text)
 fig_wordcloud, ax = plt.subplots(figsize=(10, 5))
 ax.imshow(wordcloud, interpolation='bilinear')
 ax.axis('off')
