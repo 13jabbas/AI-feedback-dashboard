@@ -9,9 +9,6 @@ from sklearn.preprocessing import label_binarize, LabelEncoder
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from wordcloud import WordCloud
-from collections import Counter
-from nltk import bigrams
-import nltk
 
 # Load data
 @st.cache_data
@@ -22,21 +19,11 @@ def load_data():
 
 df, hallucinations = load_data()
 
-# Title and Introduction
-st.title("📊 LLM Performance Dashboard")
-st.markdown("""
-This interactive dashboard provides insights into **Large Language Model (LLM)** predictions and hallucinations.
-Use the various metrics and visualizations to evaluate model performance across multiple attributes.
-""")
+# Streamlit Title and description
+st.title("LLM Performance Dashboard")
+st.write("This dashboard shows various metrics related to LLM predictions and hallucinations.")
 
-# Section 1: Metrics Evaluation for Attributes
-st.header("1️⃣ Metrics Evaluation for Attributes")
-st.markdown("""
-In this section, we evaluate the **Micro F1 score, Precision, Recall, and AUC (ROC)** for different attributes of the model's predictions.
-The metrics are calculated based on comparisons between predicted values and checked values.
-""")
-
-# Function to evaluate metrics
+# Micro F1 score, precision, recall, and ROC evaluation for each attribute
 def evaluate_metrics(df, columns_to_evaluate):
     results = {}
     for col in columns_to_evaluate:
@@ -74,55 +61,38 @@ def evaluate_metrics(df, columns_to_evaluate):
 columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
 results = evaluate_metrics(df, columns_to_evaluate)
 
-# Display ROC curves in Streamlit
-st.subheader("ROC Curves")
-fig, ax = plt.subplots(figsize=(12, 8))
-for col, metrics in results.items():
-    ax.plot(metrics['FPR'], metrics['TPR'], label=f"{col} (AUC = {metrics['AUC']:.2f})")
+# Dropdown selection for entity
+st.subheader("Select Entity to View Metrics")
+selected_entity = st.selectbox("Choose an entity", columns_to_evaluate)
+
+# Display the metrics for the selected entity
+st.subheader(f"Metrics for {selected_entity}")
+metrics = results[selected_entity]
+
+# Display metrics in boxes
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric(label="Micro F1 Score", value=f"{metrics['Micro F1 Score']:.4f}")
+with col2:
+    st.metric(label="Precision", value=f"{metrics['Precision']:.4f}")
+with col3:
+    st.metric(label="Recall", value=f"{metrics['Recall']:.4f}")
+
+st.metric(label="AUC", value=f"{metrics['AUC']:.4f}")
+
+# Display ROC curve for selected entity
+st.subheader("ROC Curve")
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.plot(metrics['FPR'], metrics['TPR'], label=f"{selected_entity} (AUC = {metrics['AUC']:.2f})")
 ax.plot([0, 1], [0, 1], 'k--', label="Random Guessing (AUC = 0.50)")
 ax.set_xlabel('False Positive Rate')
 ax.set_ylabel('True Positive Rate')
-ax.set_title('ROC Curves')
+ax.set_title(f'ROC Curve for {selected_entity}')
 ax.legend(loc='lower right')
 st.pyplot(fig)
 
-# Display metric results
-st.subheader("Evaluation Metrics by Attribute")
-for col, metrics in results.items():
-    st.write(f"### Metrics for {col}:")
-    for metric, value in metrics.items():
-        if metric not in ['FPR', 'TPR']:
-            st.write(f"  **{metric}:** {value:.4f}")
-
-# Section 2: Accuracy Gauges for Attributes
-st.header("2️⃣ Accuracy Gauges for Attributes")
-st.markdown("""
-The following gauges represent the accuracy of predictions for each attribute, calculated by comparing the predicted and checked values.
-""")
-
-def calculate_accuracies(df):
-    accuracies = {}
-    for col in df.columns:
-        if 'Checked' in col:
-            original_col = col.replace(' Checked', '')
-            correct_predictions = (df[col] == df[original_col]).sum()
-            total_predictions = len(df[col])
-            accuracy = correct_predictions / total_predictions
-            accuracies[original_col] = accuracy
-    return accuracies
-
-accuracies = calculate_accuracies(df)
-fig_gauges = make_subplots(rows=1, cols=len(accuracies), subplot_titles=list(accuracies.keys()), specs=[[{'type': 'indicator'}] * len(accuracies)])
-for i, (attr, accuracy) in enumerate(accuracies.items()):
-    fig_gauges.add_trace(go.Indicator(mode="gauge+number", value=accuracy * 100, title={'text': attr}, gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "darkblue"}}), row=1, col=i+1)
-fig_gauges.update_layout(height=400, width=1500, title_text="Accuracy Gauges for Attributes")
-st.plotly_chart(fig_gauges)
-
-# Section 3: Word Cloud for Hallucinations
-st.header("3️⃣ Word Cloud for Hallucinations")
-st.markdown("""
-Explore the **Word Cloud** below, which represents descriptions associated with hallucinations, where no keyword matches were found.
-""")
+# Word Cloud for Hallucinations
+st.subheader("Word Cloud for Hallucinations")
 new_df = hallucinations[hallucinations['Keyword Match Count'] == 0]
 text = ' '.join(new_df['Description'].astype(str))
 wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
