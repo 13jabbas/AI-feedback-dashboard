@@ -63,9 +63,9 @@ def evaluate_metrics(df, columns_to_evaluate):
 columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
 results = evaluate_metrics(df, columns_to_evaluate)
 
-# Dropdown selection for entity
-st.subheader("Select Entity to View Metrics")
-selected_entity = st.selectbox("Choose an entity", columns_to_evaluate)
+# Sidebar for entity selection
+st.sidebar.title("Entity Selection")
+selected_entity = st.sidebar.selectbox("Choose an entity", columns_to_evaluate)
 
 # Display the metrics for the selected entity as gauges
 st.subheader(f"Metrics Gauges for {selected_entity}")
