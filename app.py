@@ -22,11 +22,21 @@ def load_data():
 
 df, hallucinations = load_data()
 
-# Streamlit Title and description
-st.title("LLM Performance Dashboard")
-st.write("This dashboard shows various metrics related to LLM predictions and hallucinations.")
+# Title and Introduction
+st.title("📊 LLM Performance Dashboard")
+st.markdown("""
+This interactive dashboard provides insights into **Large Language Model (LLM)** predictions and hallucinations.
+Use the various metrics and visualizations to evaluate model performance across multiple attributes.
+""")
 
-# Micro F1 score, precision, recall, and ROC evaluation for each attribute
+# Section 1: Metrics Evaluation for Attributes
+st.header("1️⃣ Metrics Evaluation for Attributes")
+st.markdown("""
+In this section, we evaluate the **Micro F1 score, Precision, Recall, and AUC (ROC)** for different attributes of the model's predictions.
+The metrics are calculated based on comparisons between predicted values and checked values.
+""")
+
+# Function to evaluate metrics
 def evaluate_metrics(df, columns_to_evaluate):
     results = {}
     for col in columns_to_evaluate:
@@ -77,15 +87,18 @@ ax.legend(loc='lower right')
 st.pyplot(fig)
 
 # Display metric results
-st.subheader("Evaluation Metrics")
+st.subheader("Evaluation Metrics by Attribute")
 for col, metrics in results.items():
-    st.write(f"Metrics for {col}:")
+    st.write(f"### Metrics for {col}:")
     for metric, value in metrics.items():
         if metric not in ['FPR', 'TPR']:
-            st.write(f"  {metric}: {value:.4f}")
+            st.write(f"  **{metric}:** {value:.4f}")
 
-# Accuracy Gauges for attributes
-st.subheader("Accuracy Gauges for Attributes")
+# Section 2: Accuracy Gauges for Attributes
+st.header("2️⃣ Accuracy Gauges for Attributes")
+st.markdown("""
+The following gauges represent the accuracy of predictions for each attribute, calculated by comparing the predicted and checked values.
+""")
 
 def calculate_accuracies(df):
     accuracies = {}
@@ -105,8 +118,11 @@ for i, (attr, accuracy) in enumerate(accuracies.items()):
 fig_gauges.update_layout(height=400, width=1500, title_text="Accuracy Gauges for Attributes")
 st.plotly_chart(fig_gauges)
 
-# Word Cloud for Hallucinations
-st.subheader("Word Cloud for Hallucinations")
+# Section 3: Word Cloud for Hallucinations
+st.header("3️⃣ Word Cloud for Hallucinations")
+st.markdown("""
+Explore the **Word Cloud** below, which represents descriptions associated with hallucinations, where no keyword matches were found.
+""")
 new_df = hallucinations[hallucinations['Keyword Match Count'] == 0]
 text = ' '.join(new_df['Description'].astype(str))
 wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
