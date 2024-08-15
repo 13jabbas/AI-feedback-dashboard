@@ -135,3 +135,64 @@ fig_wordcloud, ax = plt.subplots(figsize=(10, 5))
 ax.imshow(wordcloud, interpolation='bilinear')
 ax.axis('off')
 st.pyplot(fig_wordcloud)
+
+
+
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+# Set page configuration
+st.set_page_config(layout="wide")
+
+# Load data
+@st.cache_data
+def load_data():
+    hallucinations = pd.read_csv('Hallucination Confidence Score (3).csv')  # Modify path as needed
+    return hallucinations
+
+hallucinations = load_data()
+
+# Streamlit Title and description
+st.title("Hallucination Confidence Heatmap")
+
+# Create heatmap
+st.subheader("Heatmap of Hallucination Confidence Score")
+
+# Ensure necessary columns are in the dataframe
+if 'Hallucination Confidence Score (3)' in hallucinations.columns and \
+   'Review Text Original' in hallucinations.columns and \
+   'Description Original' in hallucinations.columns:
+   
+    # Create hover data
+    hover_data = hallucinations[['Review Text Original', 'Description Original']]
+    
+    # Generate heatmap
+    fig = px.imshow(
+        hallucinations.pivot_table(
+            index='Description Original', 
+            columns='Review Text Original', 
+            values='Hallucination Confidence Score (3)',
+            aggfunc='mean', 
+            fill_value=0
+        ),
+        color_continuous_scale='Viridis',
+        labels={'color': 'Confidence Score'},
+        title='Heatmap of Hallucination Confidence Score',
+        text_auto=True  # Automatically display text values in the cells
+    )
+    
+    # Update hover information
+    fig.update_traces(
+        hovertemplate="<br>".join([
+            "Review Text Original: %{x}",
+            "Description Original: %{y}",
+            "Confidence Score: %{z:.2f}<extra></extra>"
+        ])
+    )
+    
+    # Display heatmap
+    st.plotly_chart(fig)
+
+else:
+    st.error("Required columns are missing from the dataset.")
