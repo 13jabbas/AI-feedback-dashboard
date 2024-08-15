@@ -19,8 +19,16 @@ def load_data():
 
 df, hallucinations = load_data()
 
+# Page Layout
+st.set_page_config(layout="wide")
+
 # Streamlit Title and description
 st.title("LLM Performance Dashboard")
+
+### Sidebar for entity selection ###
+st.sidebar.title("Entity Selection")
+columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
+selected_entity = st.sidebar.selectbox("Choose an entity", columns_to_evaluate)
 
 ### Section 1: Entities and Metrics ###
 st.markdown("## Entity Metrics")
@@ -60,16 +68,11 @@ def evaluate_metrics(df, columns_to_evaluate):
     return results
 
 # Metrics evaluation
-columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
 results = evaluate_metrics(df, columns_to_evaluate)
-
-# Sidebar for entity selection
-st.sidebar.title("Entity Selection")
-selected_entity = st.sidebar.selectbox("Choose an entity", columns_to_evaluate)
+metrics = results[selected_entity]
 
 # Display the metrics for the selected entity as gauges
 st.subheader(f"Metrics Gauges for {selected_entity}")
-metrics = results[selected_entity]
 
 # Create gauges for each metric using Plotly with box-like appearance
 fig_gauges = make_subplots(rows=1, cols=4, 
