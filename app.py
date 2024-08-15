@@ -65,20 +65,43 @@ results = evaluate_metrics(df, columns_to_evaluate)
 st.subheader("Select Entity to View Metrics")
 selected_entity = st.selectbox("Choose an entity", columns_to_evaluate)
 
-# Display the metrics for the selected entity
-st.subheader(f"Metrics for {selected_entity}")
+# Display the metrics for the selected entity as gauges
+st.subheader(f"Metrics Gauges for {selected_entity}")
 metrics = results[selected_entity]
 
-# Display metrics in boxes
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric(label="Micro F1 Score", value=f"{metrics['Micro F1 Score']:.4f}")
-with col2:
-    st.metric(label="Precision", value=f"{metrics['Precision']:.4f}")
-with col3:
-    st.metric(label="Recall", value=f"{metrics['Recall']:.4f}")
+# Create gauges for each metric using Plotly
+fig_gauges = make_subplots(rows=1, cols=4, subplot_titles=["Micro F1 Score", "Precision", "Recall", "AUC"], specs=[[{'type': 'indicator'}] * 4])
 
-st.metric(label="AUC", value=f"{metrics['AUC']:.4f}")
+fig_gauges.add_trace(go.Indicator(
+    mode="gauge+number",
+    value=metrics['Micro F1 Score'] * 100,
+    title={'text': "Micro F1 Score"},
+    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "darkblue"}}
+), row=1, col=1)
+
+fig_gauges.add_trace(go.Indicator(
+    mode="gauge+number",
+    value=metrics['Precision'] * 100,
+    title={'text': "Precision"},
+    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "green"}}
+), row=1, col=2)
+
+fig_gauges.add_trace(go.Indicator(
+    mode="gauge+number",
+    value=metrics['Recall'] * 100,
+    title={'text': "Recall"},
+    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "orange"}}
+), row=1, col=3)
+
+fig_gauges.add_trace(go.Indicator(
+    mode="gauge+number",
+    value=metrics['AUC'] * 100,
+    title={'text': "AUC"},
+    gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "red"}}
+), row=1, col=4)
+
+fig_gauges.update_layout(height=400, width=1200, title_text=f"Accuracy Gauges for {selected_entity}")
+st.plotly_chart(fig_gauges)
 
 # Display ROC curve for selected entity
 st.subheader("ROC Curve")
