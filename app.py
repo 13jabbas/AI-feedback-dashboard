@@ -147,34 +147,20 @@ import pandas as pd
 import streamlit as st
 import os
 
+
+
 def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     # Ensure the columns used in the heatmap exist
     if not all(col in input_df.columns for col in [input_y, input_x, input_color]):
         st.error("One or more columns are missing in the DataFrame")
         return None
 
-    # Convert the color column to string, then strip percentage sign and convert to float
-    input_df[input_color] = (
-        input_df[input_color].astype(str).str.rstrip('%').astype(float)
-    )
-
-    # Drop rows where the color column could not be converted
-    input_df = input_df.dropna(subset=[input_color])
-    
-    if input_df.empty:
-        st.write("DataFrame is empty after cleaning.")
-        return None
-
-    # Define color scale
-    color_scale = alt.Scale(scheme=input_color_theme)
-
-    # Create the heatmap
     heatmap = alt.Chart(input_df).mark_rect().encode(
         y=alt.Y(f'{input_y}:O', axis=alt.Axis(title="Review", titleFontSize=18, titlePadding=15, titleFontWeight=900, labelAngle=0)),
-        x=alt.X(f'{input_x}:O', axis=alt.Axis(title="Description", titleFontSize=18, titlePadding=15, titleFontWeight=900)),
+        x=alt.X(f'{input_x}:O', axis=alt.Axis(title="", titleFontSize=18, titlePadding=15, titleFontWeight=900)),
         color=alt.Color(f'{input_color}:Q',
                         legend=None,
-                        scale=color_scale),
+                        scale=alt.Scale(scheme=input_color_theme)),
         stroke=alt.value('black'),
         strokeWidth=alt.value(0.25),
         tooltip=[
@@ -189,6 +175,13 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
         labelFontSize=12,
         titleFontSize=12
     )
+
+    # Adjust the size of the squares
+    heatmap = heatmap.configure_view(
+        continuousWidth=width,
+        continuousHeight=height
+    )
+
     return heatmap
 
 # Load DataFrame (example code)
