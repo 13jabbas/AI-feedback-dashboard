@@ -194,9 +194,18 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
 data_path = 'Hallucination Confidence Score (3).csv'  # Update with the actual path
 if os.path.exists(data_path):
     hallucinations_df = pd.read_csv(data_path)
+    st.write(hallucinations_df.head())  # Check first few rows
+    st.write(hallucinations_df.describe())  # Get summary statistics
 else:
     st.write("File not found.")
     hallucinations_df = pd.DataFrame()  # Empty DataFrame
+
+# Check column values
+st.write(hallucinations_df['Hallucination Confidence Score'].unique())
+
+# Check for non-numeric values
+non_numeric = hallucinations_df[~pd.to_numeric(hallucinations_df['Hallucination Confidence Score'], errors='coerce').notna()]
+st.write(non_numeric)
 
 # Generate heatmap if the DataFrame is not empty
 if not hallucinations_df.empty:
@@ -212,3 +221,4 @@ if not hallucinations_df.empty:
         st.altair_chart(heatmap_chart, use_container_width=True)
 else:
     st.write("Data is not available or the DataFrame is empty.")
+
