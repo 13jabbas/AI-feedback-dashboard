@@ -148,51 +148,48 @@ import streamlit as st
 
 
 
-# Function to create the heatmap with tooltips
 def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
-    # Altair chart with tooltips
+    # Ensure the columns used in the heatmap exist
+    if not all(col in input_df.columns for col in [input_y, input_x, input_color]):
+        st.error("One or more columns are missing in the DataFrame")
+        return None
+
     heatmap = alt.Chart(input_df).mark_rect().encode(
         y=alt.Y(f'{input_y}:O', axis=alt.Axis(title="Year", titleFontSize=18, titlePadding=15, titleFontWeight=900, labelAngle=0)),
         x=alt.X(f'{input_x}:O', axis=alt.Axis(title="", titleFontSize=18, titlePadding=15, titleFontWeight=900)),
-        color=alt.Color(f'max({input_color}):Q',
+        color=alt.Color(f'{input_color}:Q',
                         legend=None,
                         scale=alt.Scale(scheme=input_color_theme)),
         stroke=alt.value('black'),
         strokeWidth=alt.value(0.25),
-        # Add tooltips to show reviews and descriptions on hover
         tooltip=[
-            alt.Tooltip('Review Text Original:N', title='Review'),
-            alt.Tooltip('Description Original:N', title='Description'),
+            alt.Tooltip(f'{input_y}:N', title='Review'),
+            alt.Tooltip(f'{input_x}:N', title='Description'),
             alt.Tooltip(f'{input_color}:Q', title='Hallucination Score')
         ]
     ).properties(
-        width=900
+        width=900,
+        height=500  # Adjust height if needed
     ).configure_axis(
         labelFontSize=12,
         titleFontSize=12
     )
     return heatmap
 
-# Example usage within Streamlit
-st.title("Heatmap with Tooltips Example")
-
-# Load your dataset (replace this with actual data)
-# Assuming 'hallucinations_df' has the columns: 'Review Text Original', 'Description Original', 'Hallucination Confidence Score'
-data_path = 'Hallucination Confidence Score (3).csv'  # Update with your actual path
-hallucinations_df = pd.read_csv(data_path)
-
-# Display the heatmap
-if not hallucinations_df.empty:
+# Generate heatmap if the file is found and DataFrame is not empty
+if 'hallucinations_df' in locals() and not hallucinations_df.empty:
     heatmap_chart = make_heatmap(
         hallucinations_df,
-        input_y='Review Text Original',  # Use Review as Y-axis
-        input_x='Description Original',  # Use Description as X-axis
-        input_color='Hallucination Confidence Score',  # Use score as color
-        input_color_theme='viridis'  # Example color scheme
+        input_y='Review Text Original', 
+        input_x='Description Original',  
+        input_color='Hallucination Confidence Score',
+        input_color_theme='viridis'  
     )
-    st.altair_chart(heatmap_chart, use_container_width=True)
+    
+    if heatmap_chart:
+        st.altair_chart(heatmap_chart, use_container_width=True)
 else:
-    st.write("No data available to display.")
+    st.write("Data is not available or the DataFrame is empty.")
 
 
 
