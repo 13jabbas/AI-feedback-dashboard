@@ -149,6 +149,11 @@ import os
 
 
 
+
+
+import altair as alt
+import streamlit as st
+
 def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     # Ensure the columns used in the heatmap exist
     if not all(col in input_df.columns for col in [input_y, input_x, input_color]):
@@ -169,20 +174,15 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
             alt.Tooltip(f'{input_color}:Q', title='Hallucination Score')
         ]
     ).properties(
-        width=900,
-        height=500  # Adjust height if needed
+        width=900,  # Width of the heatmap
+        height=500  # Height of the heatmap
     ).configure_axis(
         labelFontSize=12,
         titleFontSize=12
     )
 
-    # Adjust the size of the squares
-    heatmap = heatmap.configure_view(
-        continuousWidth=width,
-        continuousHeight=height
-    )
-
     return heatmap
+
 
 # Load DataFrame (example code)
 data_path = 'Hallucination Confidence Score (3).csv'  # Update with the actual path
