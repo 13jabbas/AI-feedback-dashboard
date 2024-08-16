@@ -160,13 +160,20 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     # Drop rows where the color column could not be converted
     input_df = input_df.dropna(subset=[input_color])
 
+    if input_df.empty:
+        st.write("DataFrame is empty after cleaning.")
+        return None
+
+    # Define color scale
+    color_scale = alt.Scale(scheme=input_color_theme)
+
     # Create the heatmap
     heatmap = alt.Chart(input_df).mark_rect().encode(
         y=alt.Y(f'{input_y}:O', axis=alt.Axis(title="Review", titleFontSize=18, titlePadding=15, titleFontWeight=900, labelAngle=0)),
         x=alt.X(f'{input_x}:O', axis=alt.Axis(title="Description", titleFontSize=18, titlePadding=15, titleFontWeight=900)),
         color=alt.Color(f'{input_color}:Q',
                         legend=None,
-                        scale=alt.Scale(scheme=input_color_theme)),
+                        scale=color_scale),
         stroke=alt.value('black'),
         strokeWidth=alt.value(0.25),
         tooltip=[
@@ -205,4 +212,3 @@ if not hallucinations_df.empty:
         st.altair_chart(heatmap_chart, use_container_width=True)
 else:
     st.write("Data is not available or the DataFrame is empty.")
-
