@@ -140,8 +140,7 @@ st.pyplot(fig_wordcloud)
 
 
 ##HEATMEAP 
-st.write(hallucinations_df.head())
-st.write(hallucinations_df.describe())
+
 
 
 import altair as alt
