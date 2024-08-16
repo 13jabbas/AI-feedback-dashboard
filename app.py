@@ -141,4 +141,59 @@ st.pyplot(fig_wordcloud)
 ##HEATMEAP 
 
 
+import pandas as pd
+import altair as alt
+
+def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
+    """
+    Create a heatmap using Altair with custom axes and color encoding based on input parameters.
+    
+    Parameters:
+    - input_df: DataFrame containing the data
+    - input_y: The column to use for the y-axis (Description Original)
+    - input_x: The column to use for the x-axis (Review Text Original)
+    - input_color: The column to use for color encoding (Hallucination Confidence Score)
+    - input_color_theme: The color theme for the heatmap
+
+    Returns:
+    - heatmap: The generated Altair heatmap chart
+    """
+    # Ensure the 'Hallucination Confidence Score (3)' column is cleaned and numeric
+    input_df[input_color] = input_df[input_color].str.replace('%', '').astype(float)
+
+    # Create the heatmap
+    heatmap = alt.Chart(input_df).mark_rect().encode(
+        y=alt.Y(f'{input_y}:O', axis=alt.Axis(
+            title="Description Original", titleFontSize=18, titlePadding=15, titleFontWeight=900, labelAngle=0)),
+        x=alt.X(f'{input_x}:O', axis=alt.Axis(
+            title="Review Text Original", titleFontSize=18, titlePadding=15, titleFontWeight=900)),
+        color=alt.Color(f'max({input_color}):Q', 
+                         legend=alt.Legend(title="Confidence Score"), 
+                         scale=alt.Scale(scheme=input_color_theme)),
+        stroke=alt.value('black'),
+        strokeWidth=alt.value(0.25),
+        tooltip=[input_y, input_x, input_color]  # Tooltip to show the Description, Review, and Confidence Score on hover
+    ).properties(
+        width=900,
+        height=300  # You can adjust the height as needed
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=12
+    )
+    
+    return heatmap
+
+# Usage example
+# Assuming you already have the 'hallucinations' DataFrame loaded
+hallucinations = pd.read_csv('Hallucination Confidence Score (3).csv')
+
+# Make heatmap using your data
+heatmap_chart = make_heatmap(hallucinations, 
+                             input_y='Description Original', 
+                             input_x='Review Text Original', 
+                             input_color='Hallucination Confidence Score', 
+                             input_color_theme='viridis')
+
+# Display the heatmap
+heatmap_chart.show()
 
