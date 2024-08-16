@@ -178,7 +178,7 @@ st.title("Heatmap with Tooltips Example")
 
 # Load your dataset (replace this with actual data)
 # Assuming 'hallucinations_df' has the columns: 'Review Text Original', 'Description Original', 'Hallucination Confidence Score'
-data_path = 'hallucination_confidence_score.csv'  # Update with your actual path
+data_path = 'Hallucination Confidence Score (3).csv'  # Update with your actual path
 hallucinations_df = pd.read_csv(data_path)
 
 # Display the heatmap
