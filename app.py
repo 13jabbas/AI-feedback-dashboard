@@ -141,12 +141,13 @@ st.pyplot(fig_wordcloud)
 ##HEATMEAP 
 
 
-import pandas as pd
 import altair as alt
+import pandas as pd
 import streamlit as st
 
-
+# Function to create the heatmap with tooltips
 def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
+    # Altair chart with tooltips
     heatmap = alt.Chart(input_df).mark_rect().encode(
         y=alt.Y(f'{input_y}:O', axis=alt.Axis(title="Year", titleFontSize=18, titlePadding=15, titleFontWeight=900, labelAngle=0)),
         x=alt.X(f'{input_x}:O', axis=alt.Axis(title="", titleFontSize=18, titlePadding=15, titleFontWeight=900)),
@@ -155,7 +156,7 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
                         scale=alt.Scale(scheme=input_color_theme)),
         stroke=alt.value('black'),
         strokeWidth=alt.value(0.25),
-        # Add tooltips here to show the reviews and descriptions when hovering
+        # Add tooltips to show reviews and descriptions on hover
         tooltip=[
             alt.Tooltip('Review Text Original:N', title='Review'),
             alt.Tooltip('Description Original:N', title='Description'),
@@ -169,18 +170,27 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     )
     return heatmap
 
+# Example usage within Streamlit
+st.set_page_config(layout="wide")
+st.title("Heatmap with Tooltips Example")
 
-# Load your dataset
-hallucinations = pd.read_csv('Hallucination Confidence Score (3).csv')
+# Load your dataset (replace this with actual data)
+# Assuming 'hallucinations_df' has the columns: 'Review Text Original', 'Description Original', 'Hallucination Confidence Score'
+data_path = 'hallucination_confidence_score.csv'  # Update with your actual path
+hallucinations_df = pd.read_csv(data_path)
 
-# Make the heatmap using your data
-heatmap_chart = make_heatmap(hallucinations, 
-                             input_y='Description Original', 
-                             input_x='Review Text Original', 
-                             input_color='Hallucination Confidence Score', 
-                             input_color_theme='viridis')
+# Display the heatmap
+if not hallucinations_df.empty:
+    heatmap_chart = make_heatmap(
+        hallucinations_df,
+        input_y='Review Text Original',  # Use Review as Y-axis
+        input_x='Description Original',  # Use Description as X-axis
+        input_color='Hallucination Confidence Score',  # Use score as color
+        input_color_theme='viridis'  # Example color scheme
+    )
+    st.altair_chart(heatmap_chart, use_container_width=True)
+else:
+    st.write("No data available to display.")
 
-# Display the heatmap in Streamlit
-st.altair_chart(heatmap_chart, use_container_width=True)
 
 
