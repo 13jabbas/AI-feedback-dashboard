@@ -12,6 +12,7 @@ from wordcloud import WordCloud
 # Set page configuration
 st.set_page_config(layout="wide")
 
+
 # Load data
 @st.cache_data
 def load_data():
@@ -145,8 +146,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-# Set page configuration - MUST be at the top before any Streamlit elements
-st.set_page_config(layout="wide")
+
 
 # Function to create the heatmap with tooltips
 def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
