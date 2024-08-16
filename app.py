@@ -138,48 +138,51 @@ st.pyplot(fig_wordcloud)
 
 
 
-import streamlit as st
+##HEATMEAP 
+
 import pandas as pd
 import plotly.express as px
 
-# Set page configuration
-st.set_page_config(layout="wide")
-
 # Load data
-@st.cache_data
-def load_data():
-    hallucinations = pd.read_csv('Hallucination Confidence Score (3).csv')  # Modify path as needed
-    return hallucinations
+hallucinations = pd.read_csv('Hallucination Confidence Score.csv')  # Modify path as needed
 
-hallucinations = load_data()
+# Check the first few rows of the dataset to verify data loading
+print("First few rows of the data:")
+print(hallucinations.head())
 
-# Streamlit Title and description
-st.title("Hallucination Confidence Heatmap")
+# Check if 'Hallucination Confidence Score (3)' contains percentages and clean them
+# Remove '%' and convert the column to numeric
+hallucinations['Hallucination Confidence Score'] = hallucinations['Hallucination Confidence Score'].str.replace('%', '').astype(float)
 
-# Create heatmap
-st.subheader("Heatmap of Hallucination Confidence Score")
+# Check for missing or problematic data in the confidence score column
+print("\nSummary statistics for the confidence score column after conversion:")
+print(hallucinations['Hallucination Confidence Score'].describe())
 
-# Ensure necessary columns are in the dataframe
-if 'Hallucination Confidence Score (3)' in hallucinations.columns and \
+# Check if the necessary columns exist in the dataframe
+if 'Hallucination Confidence Score' in hallucinations.columns and \
    'Review Text Original' in hallucinations.columns and \
    'Description Original' in hallucinations.columns:
-   
-    # Create hover data
-    hover_data = hallucinations[['Review Text Original', 'Description Original']]
     
-    # Generate heatmap
+    # Create pivot table for heatmap
+    heatmap_data = hallucinations.pivot_table(
+        index='Description Original', 
+        columns='Review Text Original', 
+        values='Hallucination Confidence Score',
+        aggfunc='sum',  # Using sum or max instead of mean
+        fill_value=None  # Don't fill missing values with zero
+    )
+    
+    # Print the pivot table to check if it's created correctly
+    print("\nPivot table for the heatmap:")
+    print(heatmap_data)
+
+    # Create heatmap
     fig = px.imshow(
-        hallucinations.pivot_table(
-            index='Description Original', 
-            columns='Review Text Original', 
-            values='Hallucination Confidence Score (3)',
-            aggfunc='mean', 
-            fill_value=0
-        ),
+        heatmap_data,
         color_continuous_scale='Viridis',
         labels={'color': 'Confidence Score'},
         title='Heatmap of Hallucination Confidence Score',
-        text_auto=True  # Automatically display text values in the cells
+        text_auto=True  # Display text values in the cells
     )
     
     # Update hover information
@@ -191,8 +194,9 @@ if 'Hallucination Confidence Score (3)' in hallucinations.columns and \
         ])
     )
     
-    # Display heatmap
-    st.plotly_chart(fig)
+    # Show heatmap
+    fig.show()
 
 else:
-    st.error("Required columns are missing from the dataset.")
+    print("Required columns are missing from the dataset.")
+
