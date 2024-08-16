@@ -145,7 +145,7 @@ st.pyplot(fig_wordcloud)
 import altair as alt
 import pandas as pd
 import streamlit as st
-
+import os
 def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     # Ensure the columns used in the heatmap exist
     if not all(col in input_df.columns for col in [input_y, input_x, input_color]):
