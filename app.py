@@ -158,13 +158,12 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     input_df[input_color] = pd.to_numeric(input_df[input_color], errors='coerce')
 
     # Check for non-numeric values
-    st.write("Unique values after conversion:")
+    st.write("Values in 'Hallucination Confidence Score' after conversion:")
     st.write(input_df[input_color].unique())
 
     # Drop rows where the color column could not be converted
     input_df = input_df.dropna(subset=[input_color])
-    
-    st.write(f"DataFrame shape after cleaning: {input_df.shape}")
+    st.write(f"DataFrame shape after dropping NaNs: {input_df.shape}")
 
     if input_df.empty:
         st.write("DataFrame is empty after cleaning.")
@@ -200,41 +199,43 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
 data_path = 'Hallucination Confidence Score (3).csv'  # Update with the actual path
 if os.path.exists(data_path):
     hallucinations_df = pd.read_csv(data_path)
-    st.write(f"DataFrame shape before cleaning: {hallucinations_df.shape}")  # Check shape
-    st.write(hallucinations_df.head())  # Check first few rows
-    st.write(hallucinations_df.describe())  # Get summary statistics
+    st.write("Initial DataFrame:")
+    st.write(hallucinations_df.head())
+    st.write(f"Initial DataFrame shape: {hallucinations_df.shape}")
+    
+    # Check column values before conversion
+    st.write("Values in 'Hallucination Confidence Score' before conversion:")
+    st.write(hallucinations_df['Hallucination Confidence Score'].unique())
+
+    # Convert to numeric
+    hallucinations_df['Hallucination Confidence Score'] = pd.to_numeric(hallucinations_df['Hallucination Confidence Score'], errors='coerce')
+
+    # Check for NaN values after conversion
+    st.write("Values in 'Hallucination Confidence Score' after conversion:")
+    st.write(hallucinations_df['Hallucination Confidence Score'].unique())
+
+    nan_rows = hallucinations_df[hallucinations_df['Hallucination Confidence Score'].isna()]
+    st.write("Rows with NaN values after conversion:")
+    st.write(nan_rows)
+
+    # Drop rows with NaN values in the color column
+    hallucinations_df = hallucinations_df.dropna(subset=['Hallucination Confidence Score'])
+    st.write(f"DataFrame shape after dropping NaNs: {hallucinations_df.shape}")
+
+    # Generate heatmap if the DataFrame is not empty
+    if not hallucinations_df.empty:
+        heatmap_chart = make_heatmap(
+            hallucinations_df,
+            input_y='Review Text Original', 
+            input_x='Description Original',  
+            input_color='Hallucination Confidence Score',
+            input_color_theme='viridis'  
+        )
+        
+        if heatmap_chart:
+            st.altair_chart(heatmap_chart, use_container_width=True)
+    else:
+        st.write("Data is not available or the DataFrame is empty.")
 else:
     st.write("File not found.")
     hallucinations_df = pd.DataFrame()  # Empty DataFrame
-
-# Check column values before conversion
-st.write("Unique values before conversion:")
-st.write(hallucinations_df['Hallucination Confidence Score'].unique())
-
-# Convert to numeric
-hallucinations_df['Hallucination Confidence Score'] = pd.to_numeric(hallucinations_df['Hallucination Confidence Score'], errors='coerce')
-
-# Check for NaN values after conversion
-nan_rows = hallucinations_df[hallucinations_df['Hallucination Confidence Score'].isna()]
-st.write("Rows with NaN values after conversion:")
-st.write(nan_rows)
-
-# Drop rows with NaN values in the color column
-hallucinations_df = hallucinations_df.dropna(subset=['Hallucination Confidence Score'])
-st.write(f"DataFrame shape after cleaning: {hallucinations_df.shape}")
-
-# Generate heatmap if the DataFrame is not empty
-if not hallucinations_df.empty:
-    heatmap_chart = make_heatmap(
-        hallucinations_df,
-        input_y='Review Text Original', 
-        input_x='Description Original',  
-        input_color='Hallucination Confidence Score',
-        input_color_theme='viridis'  
-    )
-    
-    if heatmap_chart:
-        st.altair_chart(heatmap_chart, use_container_width=True)
-else:
-    st.write("Data is not available or the DataFrame is empty.")
-
