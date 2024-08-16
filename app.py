@@ -142,7 +142,6 @@ st.pyplot(fig_wordcloud)
 ##HEATMEAP 
 
 
-
 import altair as alt
 import pandas as pd
 import streamlit as st
@@ -154,8 +153,10 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
         st.error("One or more columns are missing in the DataFrame")
         return None
 
-    # Convert the color column to numeric
-    input_df[input_color] = pd.to_numeric(input_df[input_color].str.rstrip('%').astype(float), errors='coerce')
+    # Convert the color column to string, then strip percentage sign and convert to float
+    input_df[input_color] = (
+        input_df[input_color].astype(str).str.rstrip('%').astype(float)
+    )
 
     # Check for non-numeric values
     st.write("Values in 'Hallucination Confidence Score' after conversion:")
@@ -209,7 +210,9 @@ if os.path.exists(data_path):
 
     # Convert percentage values to numeric
     hallucinations_df['Hallucination Confidence Score'] = (
-        pd.to_numeric(hallucinations_df['Hallucination Confidence Score'].str.rstrip('%').astype(float), errors='coerce')
+        hallucinations_df['Hallucination Confidence Score'].astype(str)
+        .str.rstrip('%')
+        .astype(float)
     )
 
     # Check for NaN values after conversion
@@ -241,3 +244,4 @@ if os.path.exists(data_path):
 else:
     st.write("File not found.")
     hallucinations_df = pd.DataFrame()  # Empty DataFrame
+
