@@ -145,6 +145,9 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
+# Set page configuration - MUST be at the top before any Streamlit elements
+st.set_page_config(layout="wide")
+
 # Function to create the heatmap with tooltips
 def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     # Altair chart with tooltips
@@ -171,7 +174,6 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     return heatmap
 
 # Example usage within Streamlit
-st.set_page_config(layout="wide")
 st.title("Heatmap with Tooltips Example")
 
 # Load your dataset (replace this with actual data)
