@@ -146,17 +146,21 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-
-
 def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     # Ensure the columns used in the heatmap exist
     if not all(col in input_df.columns for col in [input_y, input_x, input_color]):
         st.error("One or more columns are missing in the DataFrame")
         return None
 
+    # Ensure the color column is numeric
+    if not pd.api.types.is_numeric_dtype(input_df[input_color]):
+        st.error(f"The column '{input_color}' must be numeric.")
+        return None
+
+    # Create the heatmap
     heatmap = alt.Chart(input_df).mark_rect().encode(
-        y=alt.Y(f'{input_y}:O', axis=alt.Axis(title="Year", titleFontSize=18, titlePadding=15, titleFontWeight=900, labelAngle=0)),
-        x=alt.X(f'{input_x}:O', axis=alt.Axis(title="", titleFontSize=18, titlePadding=15, titleFontWeight=900)),
+        y=alt.Y(f'{input_y}:O', axis=alt.Axis(title="Review", titleFontSize=18, titlePadding=15, titleFontWeight=900, labelAngle=0)),
+        x=alt.X(f'{input_x}:O', axis=alt.Axis(title="Description", titleFontSize=18, titlePadding=15, titleFontWeight=900)),
         color=alt.Color(f'{input_color}:Q',
                         legend=None,
                         scale=alt.Scale(scheme=input_color_theme)),
@@ -176,8 +180,16 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     )
     return heatmap
 
-# Generate heatmap if the file is found and DataFrame is not empty
-if 'hallucinations_df' in locals() and not hallucinations_df.empty:
+# Load DataFrame (example code)
+data_path = 'hallucination_confidence_score.csv'  # Update with the actual path
+if os.path.exists(data_path):
+    hallucinations_df = pd.read_csv(data_path)
+else:
+    st.write("File not found.")
+    hallucinations_df = pd.DataFrame()  # Empty DataFrame
+
+# Generate heatmap if the DataFrame is not empty
+if not hallucinations_df.empty:
     heatmap_chart = make_heatmap(
         hallucinations_df,
         input_y='Review Text Original', 
@@ -190,6 +202,3 @@ if 'hallucinations_df' in locals() and not hallucinations_df.empty:
         st.altair_chart(heatmap_chart, use_container_width=True)
 else:
     st.write("Data is not available or the DataFrame is empty.")
-
-
-
