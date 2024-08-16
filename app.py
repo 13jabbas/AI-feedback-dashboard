@@ -154,11 +154,21 @@ import os
 import altair as alt
 import streamlit as st
 
+import altair as alt
+import streamlit as st
+
 def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     # Ensure the columns used in the heatmap exist
     if not all(col in input_df.columns for col in [input_y, input_x, input_color]):
         st.error("One or more columns are missing in the DataFrame")
         return None
+
+    # Define the size of each cell in the heatmap
+    cell_size = 20  # Adjust this value for cell size
+
+    # Calculate width and height based on the number of unique x and y values
+    width = cell_size * len(input_df[input_x].unique())
+    height = cell_size * len(input_df[input_y].unique())
 
     heatmap = alt.Chart(input_df).mark_rect().encode(
         y=alt.Y(f'{input_y}:O', axis=alt.Axis(title="Review", titleFontSize=18, titlePadding=15, titleFontWeight=900, labelAngle=0)),
@@ -174,8 +184,8 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
             alt.Tooltip(f'{input_color}:Q', title='Hallucination Score')
         ]
     ).properties(
-        width=900,  # Width of the heatmap
-        height=500  # Height of the heatmap
+        width=width,  # Adjust the width based on the number of unique x values
+        height=height  # Adjust the height based on the number of unique y values
     ).configure_axis(
         labelFontSize=12,
         titleFontSize=12
