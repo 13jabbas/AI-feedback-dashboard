@@ -155,7 +155,7 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
         return None
 
     # Convert the color column to numeric
-    input_df[input_color] = pd.to_numeric(input_df[input_color], errors='coerce')
+    input_df[input_color] = pd.to_numeric(input_df[input_color].str.rstrip('%').astype(float), errors='coerce')
 
     # Check for non-numeric values
     st.write("Values in 'Hallucination Confidence Score' after conversion:")
@@ -202,13 +202,15 @@ if os.path.exists(data_path):
     st.write("Initial DataFrame:")
     st.write(hallucinations_df.head())
     st.write(f"Initial DataFrame shape: {hallucinations_df.shape}")
-    
+
     # Check column values before conversion
     st.write("Values in 'Hallucination Confidence Score' before conversion:")
     st.write(hallucinations_df['Hallucination Confidence Score'].unique())
 
-    # Convert to numeric
-    hallucinations_df['Hallucination Confidence Score'] = pd.to_numeric(hallucinations_df['Hallucination Confidence Score'], errors='coerce')
+    # Convert percentage values to numeric
+    hallucinations_df['Hallucination Confidence Score'] = (
+        pd.to_numeric(hallucinations_df['Hallucination Confidence Score'].str.rstrip('%').astype(float), errors='coerce')
+    )
 
     # Check for NaN values after conversion
     st.write("Values in 'Hallucination Confidence Score' after conversion:")
