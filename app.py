@@ -146,16 +146,18 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 import os
+
 def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     # Ensure the columns used in the heatmap exist
     if not all(col in input_df.columns for col in [input_y, input_x, input_color]):
         st.error("One or more columns are missing in the DataFrame")
         return None
 
-    # Ensure the color column is numeric
-    if not pd.api.types.is_numeric_dtype(input_df[input_color]):
-        st.error(f"The column '{input_color}' must be numeric.")
-        return None
+    # Convert the color column to numeric
+    input_df[input_color] = pd.to_numeric(input_df[input_color], errors='coerce')
+
+    # Drop rows where the color column could not be converted
+    input_df = input_df.dropna(subset=[input_color])
 
     # Create the heatmap
     heatmap = alt.Chart(input_df).mark_rect().encode(
@@ -181,7 +183,7 @@ def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
     return heatmap
 
 # Load DataFrame (example code)
-data_path = 'Hallucination Confidence Score (3).csv'
+data_path = 'Hallucination Confidence Score (3).csv'  # Update with the actual path
 if os.path.exists(data_path):
     hallucinations_df = pd.read_csv(data_path)
 else:
@@ -202,3 +204,4 @@ if not hallucinations_df.empty:
         st.altair_chart(heatmap_chart, use_container_width=True)
 else:
     st.write("Data is not available or the DataFrame is empty.")
+
