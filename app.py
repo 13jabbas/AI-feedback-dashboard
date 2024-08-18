@@ -27,8 +27,8 @@ st.title("LLM Performance Dashboard")
 # Layout for the entities section with metrics
 st.header("Entity Metrics")
 
-# Create a two-column layout
-col1, col2 = st.columns([1, 4])  # col1 for the dropdown, col2 for gauges and ROC curve
+# Create a three-column layout
+col1, col2, col3 = st.columns([1, 4, 2])  # col1 for the dropdown, col2 for gauges and ROC curve, col3 for entities list
 
 # Micro F1 score, precision, recall, and ROC evaluation for each attribute
 def evaluate_metrics(df, columns_to_evaluate):
@@ -123,30 +123,20 @@ with col2:
     ax.legend(loc='lower right')
     st.pyplot(fig)
 
-# Add a section for displaying entities ordered by accuracy
-st.subheader("Entities Ordered by Accuracy")
+# Add a section for displaying entities ordered by accuracy in the third column
+with col3:
+    st.subheader("Entities Ordered by Accuracy")
 
-# Create two columns for the headings
-col1, col2 = st.columns([3, 1])
+    # Add headings for 'Entity' and 'Accuracy'
+    st.markdown("### Entity | Accuracy")
 
-# Add headings for 'Entity' and 'Accuracy'
-with col1:
-    st.markdown("### Entity")
-    
-with col2:
-    st.markdown("### Accuracy")
+    # Sort entities based on their AUC score in descending order
+    sorted_entities = sorted(results.items(), key=lambda x: x[1]['AUC'], reverse=True)
 
-# Sort entities based on their AUC score in descending order
-sorted_entities = sorted(results.items(), key=lambda x: x[1]['AUC'], reverse=True)
-
-# Display the entities with a bar next to each
-for entity, metrics in sorted_entities:
-    col1, col2 = st.columns([3, 1])  # Create two columns: one for the entity name and one for the bar
-
-    with col1:
-        st.write(f"{entity}: {metrics['AUC']:.2f}")
-    
-    with col2:
+    # Display the entities with a bar next to each
+    for entity, metrics in sorted_entities:
+        entity_name = f"{entity}: {metrics['AUC']:.2f}"
+        st.write(entity_name)
         # Display a horizontal bar based on the AUC value
         st.progress(int(metrics['AUC'] * 100))  # Multiplied by 100 to match Streamlit's 0-100 scale
 
