@@ -8,7 +8,49 @@ from sklearn.preprocessing import label_binarize, LabelEncoder
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from wordcloud import WordCloud
+from sklearn.feature_extraction.text import CountVectorizer
+from collections import Counter
 
+# Set page configuration
+st.set_page_config(layout="wide")
+
+# Custom CSS for dark mode
+dark_mode_css = """
+    <style>
+    body {
+        background-color: #0e1117;
+        color: white;
+    }
+    .stTextInput, .stSelectbox, .stDataFrame, .stPlotlyChart, .stCheckbox, .stButton {
+        background-color: #1e1e1e;
+        color: white;
+        border-radius: 5px;
+    }
+    .stProgress > div > div {
+        background-color: #1f77b4 !important;  /* Custom progress bar color */
+    }
+    .stColumn > div {
+        background-color: #1e1e1e;
+        border-radius: 5px;
+        padding: 10px;
+    }
+    .stHeader {
+        color: #eaeaea;
+    }
+    .stMarkdown {
+        color: #eaeaea;
+    }
+    .stPlotlyChart {
+        background-color: #1e1e1e !important;
+    }
+    .stTitle {
+        color: #eaeaea !important;
+    }
+    </style>
+"""
+
+# Inject the custom CSS for dark mode
+st.markdown(dark_mode_css, unsafe_allow_html=True)
 
 # Load data
 @st.cache_data
@@ -27,8 +69,6 @@ st.header("Entity Metrics")
 
 # Create a three-column layout
 col1, col2, col3 = st.columns([1, 4, 2])  # col1 for the dropdown, col2 for gauges and ROC curve, col3 for entities list
-
-
 
 # Micro F1 score, precision, recall, and ROC evaluation for each attribute
 def evaluate_metrics(df, columns_to_evaluate):
@@ -71,7 +111,7 @@ results = evaluate_metrics(df, columns_to_evaluate)
 # Sidebar for dropdown selection
 with col1:
     st.subheader("Select Entity to View Metrics")
-    selected_entity = st.selectbox("", columns_to_evaluate)
+    selected_entity = st.selectbox("Choose an entity", columns_to_evaluate)
 
 # Display the metrics for the selected entity as gauges
 with col2:
@@ -151,8 +191,17 @@ st.header("Hallucinations Analysis")
 st.subheader("Word Cloud for Hallucinations")
 new_df = hallucinations[hallucinations['Keyword Match Count'] == 0]
 text = ' '.join(new_df['Description'].astype(str))
-wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='white').generate(text)
 fig_wordcloud, ax = plt.subplots(figsize=(10, 5))
 ax.imshow(wordcloud, interpolation='bilinear')
 ax.axis('off')
 st.pyplot(fig_wordcloud)
+
+# Bigram analysis
+st.subheader("Top 10 Most Common Bigrams")
+
+# Generate bigrams
+vectorizer = CountVectorizer(ngram_range=(2, 2))
+X = vectorizer.fit_transform(new_df['Description'].astype(str))
+bigrams = vectorizer.get_feature_names_out()
+bigram_counts = X.sum(axis=
