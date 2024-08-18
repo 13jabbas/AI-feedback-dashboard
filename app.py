@@ -14,8 +14,7 @@ from collections import Counter
 # Set page configuration
 st.set_page_config(layout="wide")
 
-
-
+   
 
 # Load data
 @st.cache_data
@@ -25,6 +24,9 @@ def load_data():
     return df, hallucinations
 
 df, hallucinations = load_data()
+
+# Convert text data to strings
+hallucinations['Description'] = hallucinations['Description'].astype(str)
 
 # Streamlit Title and description
 st.title("LLM Performance Dashboard")
@@ -153,34 +155,30 @@ with col3:
 st.header("Hallucinations Analysis")
 
 # Create a two-column layout for the word cloud and bigrams
-col4, col5 = st.columns([2, 1])  # col4 for the word cloud, col5 for bigrams table
+col4, col5 = st.columns([2, 1])  # Adjust widths as needed
 
-# Word Cloud for Hallucinations
+# Hallucinations Word Cloud
 with col4:
-    st.subheader("Word Cloud for Hallucinations")
-    new_df = hallucinations[hallucinations['Keyword Match Count'] == 0]
-    text = ' '.join(new_df['Description'].astype(str))
-    wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='ocean').generate(text)
-    fig_wordcloud, ax = plt.subplots(figsize=(10, 5))
-    ax.imshow(wordcloud, interpolation='bilinear')
-    ax.axis('off')
-    st.pyplot(fig_wordcloud)
+    st.subheader("Hallucinations Word Cloud")
+    text = ' '.join(hallucinations['Description'])
+    wordcloud = WordCloud(width=800, height=400, background_color='BuPu').generate(text)
+    st.image(wordcloud.to_image(), use_column_width=True)
 
 # Bigrams Analysis
 with col5:
     st.subheader("Top 10 Bigrams")
-    
+
     # Extract and count bigrams
     vectorizer = CountVectorizer(ngram_range=(2, 2))
-    X = vectorizer.fit_transform(new_df['Description'])
+    X = vectorizer.fit_transform(hallucinations['Description'])
     bigrams = vectorizer.get_feature_names_out()
     bigram_counts = np.asarray(X.sum(axis=0)).flatten()
-    
+
     # Create a DataFrame for the top 10 bigrams
     bigram_freq = dict(zip(bigrams, bigram_counts))
     sorted_bigrams = sorted(bigram_freq.items(), key=lambda x: x[1], reverse=True)[:10]
-    
+
     bigram_df = pd.DataFrame(sorted_bigrams, columns=['Bigram', 'Frequency'])
     st.dataframe(bigram_df)
-    
+
    
