@@ -160,7 +160,7 @@ with col4:
     st.subheader("Word Cloud for Hallucinations")
     new_df = hallucinations[hallucinations['Keyword Match Count'] == 0]
     text = ' '.join(new_df['Description'].astype(str))
-    wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='white').generate(text)
+    wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='ocean').generate(text)
     fig_wordcloud, ax = plt.subplots(figsize=(10, 5))
     ax.imshow(wordcloud, interpolation='bilinear')
     ax.axis('off')
