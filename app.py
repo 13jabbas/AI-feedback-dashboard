@@ -12,7 +12,6 @@ from wordcloud import WordCloud
 # Set page configuration
 st.set_page_config(layout="wide")
 
-
 # Load data
 @st.cache_data
 def load_data():
@@ -28,8 +27,8 @@ st.title("LLM Performance Dashboard")
 # Layout for the entities section with metrics
 st.header("Entity Metrics")
 
-# Create a three-column layout
-col1, col2, col3 = st.columns([1, 4, 2])  # Adding col3 for the sorted list of entities
+# Create a two-column layout
+col1, col2 = st.columns([1, 4])  # col1 for the dropdown, col2 for gauges and ROC curve
 
 # Micro F1 score, precision, recall, and ROC evaluation for each attribute
 def evaluate_metrics(df, columns_to_evaluate):
@@ -69,15 +68,12 @@ def evaluate_metrics(df, columns_to_evaluate):
 columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
 results = evaluate_metrics(df, columns_to_evaluate)
 
-# Sort entities by their AUC score in descending order
-sorted_entities = sorted(results.items(), key=lambda x: x[1]['AUC'], reverse=True)
-
-# Sidebar for dropdown selection (col1)
+# Sidebar for dropdown selection
 with col1:
     st.subheader("Select Entity to View Metrics")
     selected_entity = st.selectbox("Choose an entity", columns_to_evaluate)
 
-# Display the metrics for the selected entity as gauges (col2)
+# Display the metrics for the selected entity as gauges
 with col2:
     st.subheader(f"Metrics Gauges for {selected_entity}")
     metrics = results[selected_entity]
@@ -127,11 +123,32 @@ with col2:
     ax.legend(loc='lower right')
     st.pyplot(fig)
 
-# New column (col3) for sorted list of entities by AUC score
-with col3:
-    st.subheader("Entities Ranked by AUC Score")
-    for entity, metrics in sorted_entities:
+# Add a section for displaying entities ordered by accuracy
+st.subheader("Entities Ordered by Accuracy")
+
+# Create two columns for the headings
+col1, col2 = st.columns([3, 1])
+
+# Add headings for 'Entity' and 'Accuracy'
+with col1:
+    st.markdown("### Entity")
+    
+with col2:
+    st.markdown("### Accuracy")
+
+# Sort entities based on their AUC score in descending order
+sorted_entities = sorted(results.items(), key=lambda x: x[1]['AUC'], reverse=True)
+
+# Display the entities with a bar next to each
+for entity, metrics in sorted_entities:
+    col1, col2 = st.columns([3, 1])  # Create two columns: one for the entity name and one for the bar
+
+    with col1:
         st.write(f"{entity}: {metrics['AUC']:.2f}")
+    
+    with col2:
+        # Display a horizontal bar based on the AUC value
+        st.progress(int(metrics['AUC'] * 100))  # Multiplied by 100 to match Streamlit's 0-100 scale
 
 # Add another section for hallucinations
 st.header("Hallucinations Analysis")
