@@ -28,8 +28,8 @@ st.title("LLM Performance Dashboard")
 # Layout for the entities section with metrics
 st.header("Entity Metrics")
 
-# Create a two-column layout
-col1, col2 = st.columns([1, 4])  # col1 for the dropdown, col2 for gauges and ROC curve
+# Create a three-column layout
+col1, col2, col3 = st.columns([1, 4, 2])  # Adding col3 for the sorted list of entities
 
 # Micro F1 score, precision, recall, and ROC evaluation for each attribute
 def evaluate_metrics(df, columns_to_evaluate):
@@ -69,12 +69,15 @@ def evaluate_metrics(df, columns_to_evaluate):
 columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
 results = evaluate_metrics(df, columns_to_evaluate)
 
-# Sidebar for dropdown selection
+# Sort entities by their AUC score in descending order
+sorted_entities = sorted(results.items(), key=lambda x: x[1]['AUC'], reverse=True)
+
+# Sidebar for dropdown selection (col1)
 with col1:
     st.subheader("Select Entity to View Metrics")
     selected_entity = st.selectbox("Choose an entity", columns_to_evaluate)
 
-# Display the metrics for the selected entity as gauges
+# Display the metrics for the selected entity as gauges (col2)
 with col2:
     st.subheader(f"Metrics Gauges for {selected_entity}")
     metrics = results[selected_entity]
@@ -124,6 +127,12 @@ with col2:
     ax.legend(loc='lower right')
     st.pyplot(fig)
 
+# New column (col3) for sorted list of entities by AUC score
+with col3:
+    st.subheader("Entities Ranked by AUC Score")
+    for entity, metrics in sorted_entities:
+        st.write(f"{entity}: {metrics['AUC']:.2f}")
+
 # Add another section for hallucinations
 st.header("Hallucinations Analysis")
 
@@ -136,92 +145,3 @@ fig_wordcloud, ax = plt.subplots(figsize=(10, 5))
 ax.imshow(wordcloud, interpolation='bilinear')
 ax.axis('off')
 st.pyplot(fig_wordcloud)
-
-
-
-##HEATMEAP 
-
-
-import altair as alt
-import pandas as pd
-import streamlit as st
-import os
-
-
-
-
-
-import altair as alt
-import streamlit as st
-
-import altair as alt
-import streamlit as st
-
-def make_heatmap(input_df, input_y, input_x, input_color, input_color_theme):
-    # Ensure the columns used in the heatmap exist
-    if not all(col in input_df.columns for col in [input_y, input_x, input_color]):
-        st.error("One or more columns are missing in the DataFrame")
-        return None
-
-    # Define the size of each cell in the heatmap
-    cell_size = 20  # Adjust this value for cell size
-
-    # Calculate width and height based on the number of unique x and y values
-    width = cell_size * len(input_df[input_x].unique())
-    height = cell_size * len(input_df[input_y].unique())
-
-    heatmap = alt.Chart(input_df).mark_rect().encode(
-        y=alt.Y(f'{input_y}:O', axis=alt.Axis(title="Review", titleFontSize=18, titlePadding=15, titleFontWeight=900, labelAngle=0)),
-        x=alt.X(f'{input_x}:O', axis=alt.Axis(title="", titleFontSize=18, titlePadding=15, titleFontWeight=900)),
-        color=alt.Color(f'{input_color}:Q',
-                        legend=None,
-                        scale=alt.Scale(scheme=input_color_theme)),
-        stroke=alt.value('black'),
-        strokeWidth=alt.value(0.25),
-        tooltip=[
-            alt.Tooltip(f'{input_y}:N', title='Review'),
-            alt.Tooltip(f'{input_x}:N', title='Description'),
-            alt.Tooltip(f'{input_color}:Q', title='Hallucination Score')
-        ]
-    ).properties(
-        width=width,  # Adjust the width based on the number of unique x values
-        height=height  # Adjust the height based on the number of unique y values
-    ).configure_axis(
-        labelFontSize=12,
-        titleFontSize=12
-    )
-
-    return heatmap
-
-
-# Load DataFrame (example code)
-data_path = 'Hallucination Confidence Score (3).csv'  # Update with the actual path
-if os.path.exists(data_path):
-    hallucinations_df = pd.read_csv(data_path)
-
-    # Convert percentage values to numeric
-    hallucinations_df['Hallucination Confidence Score'] = (
-        hallucinations_df['Hallucination Confidence Score'].astype(str)
-        .str.rstrip('%')
-        .astype(float)
-    )
-
-    # Drop rows with NaN values in the color column
-    hallucinations_df = hallucinations_df.dropna(subset=['Hallucination Confidence Score'])
-
-    # Generate heatmap if the DataFrame is not empty
-    if not hallucinations_df.empty:
-        heatmap_chart = make_heatmap(
-            hallucinations_df,
-            input_y='Review Text Original', 
-            input_x='Description Original',  
-            input_color='Hallucination Confidence Score',
-            input_color_theme='viridis'  
-        )
-        
-        if heatmap_chart:
-            st.altair_chart(heatmap_chart, use_container_width=True)
-    else:
-        st.write("Data is not available or the DataFrame is empty.")
-else:
-    st.write("File not found.")
