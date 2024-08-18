@@ -176,11 +176,3 @@ sorted_bigrams = sorted(bigram_freq.items(), key=lambda x: x[1], reverse=True)[:
 bigram_df = pd.DataFrame(sorted_bigrams, columns=['Bigram', 'Frequency'])
 st.dataframe(bigram_df)
 
-# Plot top 10 bigrams
-st.subheader("Top 10 Bigrams Bar Chart")
-fig_bigrams = plt.figure(figsize=(10, 5))
-sns.barplot(x='Frequency', y='Bigram', data=bigram_df, palette='viridis')
-plt.title('Top 10 Most Common Bigrams')
-plt.xlabel('Frequency')
-plt.ylabel('Bigram')
-st.pyplot(fig_bigrams)
