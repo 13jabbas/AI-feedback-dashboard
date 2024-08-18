@@ -14,43 +14,7 @@ from collections import Counter
 # Set page configuration
 st.set_page_config(layout="wide")
 
-# Custom CSS for dark mode
-dark_mode_css = """
-    <style>
-    body {
-        background-color: #0e1117;
-        color: white;
-    }
-    .stTextInput, .stSelectbox, .stDataFrame, .stPlotlyChart, .stCheckbox, .stButton {
-        background-color: #1e1e1e;
-        color: white;
-        border-radius: 5px;
-    }
-    .stProgress > div > div {
-        background-color: #1f77b4 !important;  /* Custom progress bar color */
-    }
-    .stColumn > div {
-        background-color: #1e1e1e;
-        border-radius: 5px;
-        padding: 10px;
-    }
-    .stHeader {
-        color: #eaeaea;
-    }
-    .stMarkdown {
-        color: #eaeaea;
-    }
-    .stPlotlyChart {
-        background-color: #1e1e1e !important;
-    }
-    .stTitle {
-        color: #eaeaea !important;
-    }
-    </style>
-"""
 
-# Inject the custom CSS for dark mode
-st.markdown(dark_mode_css, unsafe_allow_html=True)
 
 # Load data
 @st.cache_data
