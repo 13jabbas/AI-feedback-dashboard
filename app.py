@@ -128,17 +128,21 @@ with col3:
     st.subheader("Entities Ordered by Accuracy")
 
     # Add headings for 'Entity' and 'Accuracy'
-    st.markdown("### Entity | Accuracy")
+    st.markdown("<b>Entity</b> | <b>Accuracy</b>", unsafe_allow_html=True)
 
     # Sort entities based on their AUC score in descending order
     sorted_entities = sorted(results.items(), key=lambda x: x[1]['AUC'], reverse=True)
 
-    # Display the entities with a bar next to each
+    # Display the entities in a table-like layout
     for entity, metrics in sorted_entities:
-        entity_name = f"{entity}: {metrics['AUC']:.2f}"
-        st.write(entity_name)
-        # Display a horizontal bar based on the AUC value
-        st.progress(int(metrics['AUC'] * 100))  # Multiplied by 100 to match Streamlit's 0-100 scale
+        entity_name = f"{entity}"
+        accuracy = f"{metrics['AUC']:.2f}"
+
+        # Create a table-like structure with columns
+        col_ent, col_acc, col_bar = st.columns([3, 2, 4])
+        col_ent.write(entity_name)
+        col_acc.write(accuracy)
+        col_bar.progress(int(metrics['AUC'] * 100))  # Multiplied by 100 to match Streamlit's 0-100 scale
 
 # Add another section for hallucinations
 st.header("Hallucinations Analysis")
