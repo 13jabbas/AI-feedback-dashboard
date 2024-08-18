@@ -16,6 +16,7 @@ st.set_page_config(layout="wide")
 
 
 
+
 # Load data
 @st.cache_data
 def load_data():
@@ -148,31 +149,38 @@ with col3:
         col_acc.write(accuracy)
         col_bar.progress(int(metrics['AUC'] * 100))  # Multiplied by 100 to match Streamlit's 0-100 scale
 
-# Add another section for hallucinations
+# Add another section for hallucinations and bigrams
 st.header("Hallucinations Analysis")
 
+# Create a two-column layout for the word cloud and bigrams
+col4, col5 = st.columns([2, 1])  # col4 for the word cloud, col5 for bigrams table
+
 # Word Cloud for Hallucinations
-st.subheader("Word Cloud for Hallucinations")
-new_df = hallucinations[hallucinations['Keyword Match Count'] == 0]
-text = ' '.join(new_df['Description'].astype(str))
-wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='BuPu').generate(text)
-fig_wordcloud, ax = plt.subplots(figsize=(10, 5))
-ax.imshow(wordcloud, interpolation='bilinear')
-ax.axis('off')
-st.pyplot(fig_wordcloud)
+with col4:
+    st.subheader("Word Cloud for Hallucinations")
+    new_df = hallucinations[hallucinations['Keyword Match Count'] == 0]
+    text = ' '.join(new_df['Description'].astype(str))
+    wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='white').generate(text)
+    fig_wordcloud, ax = plt.subplots(figsize=(10, 5))
+    ax.imshow(wordcloud, interpolation='bilinear')
+    ax.axis('off')
+    st.pyplot(fig_wordcloud)
 
-# Bigram analysis
-st.subheader("Top 10 Most Common Bigrams")
-
-# Generate bigrams
-vectorizer = CountVectorizer(ngram_range=(2, 2))
-X = vectorizer.fit_transform(new_df['Description'].astype(str))
-bigrams = vectorizer.get_feature_names_out()
-bigram_counts = X.sum(axis=0).A1
-bigram_freq = dict(zip(bigrams, bigram_counts))
-sorted_bigrams = sorted(bigram_freq.items(), key=lambda x: x[1], reverse=True)[:10]
-
-# Display top 10 bigrams
-bigram_df = pd.DataFrame(sorted_bigrams, columns=['Bigram', 'Frequency'])
-st.dataframe(bigram_df)
-
+# Bigrams Analysis
+with col5:
+    st.subheader("Top 10 Bigrams")
+    
+    # Extract and count bigrams
+    vectorizer = CountVectorizer(ngram_range=(2, 2))
+    X = vectorizer.fit_transform(new_df['Description'])
+    bigrams = vectorizer.get_feature_names_out()
+    bigram_counts = np.asarray(X.sum(axis=0)).flatten()
+    
+    # Create a DataFrame for the top 10 bigrams
+    bigram_freq = dict(zip(bigrams, bigram_counts))
+    sorted_bigrams = sorted(bigram_freq.items(), key=lambda x: x[1], reverse=True)[:10]
+    
+    bigram_df = pd.DataFrame(sorted_bigrams, columns=['Bigram', 'Frequency'])
+    st.dataframe(bigram_df)
+    
+   
