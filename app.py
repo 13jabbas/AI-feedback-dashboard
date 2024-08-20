@@ -193,7 +193,7 @@ heatmap = go.Figure(data=go.Heatmap(
     colorbar=dict(title="Confidence Score")  # Colorbar label
 ))
 
-# Update layout to make entries appear as squares
+# Adjust layout to handle large number of entries
 heatmap.update_layout(
     title='Interactive Heatmap of Hallucination Confidence Scores',
     xaxis_title='Index',
@@ -207,17 +207,14 @@ heatmap.update_layout(
         ticks='',  # Remove ticks
         showticklabels=False  # Hide tick labels
     ),
-    autosize=False,
-    width=600,  # Adjust width to your needs
-    height=400   # Adjust height to match width for square cells
+    autosize=True,  # Allow auto sizing to fit content
+    width=1200,  # Adjust width to fit more data
+    height=600,  # Adjust height to fit more data
+    dragmode='zoom'  # Enable zoom and pan functionality
 )
 
 
-# Add title
-heatmap.update_layout(
-    title='Interactive Heatmap of Hallucination Confidence Scores',
-    xaxis_nticks=36
-)
+
 
 # Display the heatmap in Streamlit
 st.plotly_chart(heatmap)
