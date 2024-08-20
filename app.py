@@ -204,7 +204,7 @@ st.plotly_chart(heatmap)
 
 
 # Display HCS
-HCS_df = pd.DataFrame(Hallucination Confidence Score (3), columns=['Hallucination Confidence Score'])
+HCS_df = df['Hallucination Confidence Score']
 st.dataframe(HCS_df)
 
 
