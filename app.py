@@ -185,7 +185,9 @@ def get_chart_79075482():
     import plotly.express as px
 
     z = [df['Hallucination Confidence Score']]
-
+    x=[df['Review Text Original']],
+    y=[df['Description Original']],
+    
     fig = px.imshow(z, text_auto=True, aspect="auto")
 
     tab1, tab2 = st.tabs(["Streamlit theme (default)", "Plotly native theme"])
