@@ -195,6 +195,7 @@ def get_chart_79075482():
         st.plotly_chart(fig, theme=None)
 
 
+get_chart_79075482()
 
 # Display HCS
 HCS_df = df['Hallucination Confidence Score']
