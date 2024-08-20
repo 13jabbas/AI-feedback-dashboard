@@ -169,7 +169,6 @@ st.dataframe(bigram_df)
 #HEATMAP Display 
 
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 
 # Read the CSV file
@@ -178,55 +177,22 @@ df = pd.read_csv('Hallucination Confidence Score (3).csv')
 # Convert 'Hallucination Confidence Score' from string percentage to float
 df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
 
-def get_chart_79075482():
-    # Limit the size of the dataset to avoid overloading
-    max_rows = 50  # Adjust this number as needed to reduce data size
-    limited_df = df.head(max_rows)
+st.title("Hallucination Confidence Scores Dashboard")
 
-    # Reshape data for heatmap using pivot_table
-    heatmap_data = limited_df.pivot_table(index='Description Original', columns='Review Text Original', values='Hallucination Confidence Score', aggfunc='mean')
+tab1, tab2, tab3 = st.tabs(["Scores", "Reviews", "Descriptions"])
 
-    # Create heatmap without displaying axis labels
-    fig = px.imshow(
-        heatmap_data.values, 
-        aspect="auto",
-        labels=dict(x="", y="", color="Hallucination Confidence Score"),
-        text_auto=True,
-    )
-    
-    # Update hover information
-    fig.update_traces(
-        hovertemplate=(
-            "Review: %{x}<br>"
-            "Description: %{y}<br>"
-            "Confidence Score: %{z:.2%}<extra></extra>"
-        )
-    )
+with tab1:
+    st.header("Scores")
+    st.dataframe(df[['Hallucination Confidence Score']])
 
-    # Update layout to remove axis labels
-    fig.update_xaxes(showticklabels=False)
-    fig.update_yaxes(showticklabels=False)
+with tab2:
+    st.header("Reviews")
+    for index, row in df.iterrows():
+        st.subheader(f"Score: {row['Hallucination Confidence Score']:.2%}")
+        st.write(row['Review Text Original'])
 
-    # Streamlit interface
-    tab1, tab2 = st.tabs(["Streamlit theme (default)", "Plotly native theme"])
-    with tab1:
-        st.plotly_chart(fig, theme="streamlit")
-    with tab2:
-        st.plotly_chart(fig, theme=None)
-
-# Call the function to display the chart
-get_chart_79075482()
-
-
-# Display HCS
-HCS_df = df['Hallucination Confidence Score']
-st.dataframe(HCS_df)
-
-
-
-fig = px.sunburst(df, path=['Description Original', 'Review Text Original'],
-                  values='Hallucination Confidence Score',
-                  color='Hallucination Confidence Score',
-                  title='Sunburst Chart of Hallucination Confidence Scores')
-
-st.plotly_chart(fig)
+with tab3:
+    st.header("Descriptions")
+    for index, row in df.iterrows():
+        st.subheader(f"Score: {row['Hallucination Confidence Score']:.2%}")
+        st.write(row['Description Original'])
