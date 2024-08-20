@@ -170,18 +170,36 @@ st.dataframe(bigram_df)
 
 
 
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+
+# Read the CSV file
+df = pd.read_csv('Hallucination Confidence Score (3).csv')
+
+# Convert 'Hallucination Confidence Score' from string percentage to float
+df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float')
+
 def get_chart_79075482():
-    import plotly.express as px
+    # Convert the data to a 2D array. Assuming you want to plot the score against 'Review Text Original' and 'Description Original'
+    z = df.pivot_table(index='Description Original', columns='Review Text Original', values='Hallucination Confidence Score')
 
-    z = [df['Hallucination Confidence Score']]
+    # Create the heatmap using plotly express
+    fig = px.imshow(z.values, 
+                    labels=dict(x="Review Text Original", y="Description Original", color="Hallucination Confidence Score"),
+                    x=z.columns, 
+                    y=z.index, 
+                    text_auto=True, 
+                    aspect="auto")
 
-    fig = px.imshow(z, text_auto=True, aspect="auto")
-
+    # Streamlit interface
     tab1, tab2 = st.tabs(["Streamlit theme (default)", "Plotly native theme"])
     with tab1:
         st.plotly_chart(fig, theme="streamlit")
     with tab2:
         st.plotly_chart(fig, theme=None)
+
+# To display the chart in Streamlit, you can call the function get_chart_79075482() within a Streamlit app
 
 
 # Display HCS
