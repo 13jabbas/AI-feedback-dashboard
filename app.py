@@ -184,12 +184,13 @@ df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.
 
 # Create the heatmap with hover data
 heatmap = go.Figure(data=go.Heatmap(
-    z=df['Hallucination Confidence Score'],
-    x=df.index,  # Using index for the x-axis
-    y=["Metric"],  # Single row for simplicity
+    z=[df['Hallucination Confidence Score']],  # Heatmap expects 2D data
+    x=df.index,  # X-axis
+    y=['Scores'],  # Single row for simplicity
     text=[f"Review: {r}<br>Description: {d}" for r, d in zip(df['Review Text Original'], df['Description Original'])],
     hoverinfo="text",
-    colorscale='Viridis'
+    colorscale='Viridis',  # Color gradient
+    colorbar=dict(title="Confidence Score")  # Colorbar label
 ))
 
 # Add title
