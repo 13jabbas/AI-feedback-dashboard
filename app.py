@@ -169,38 +169,35 @@ st.dataframe(bigram_df)
 #HEATMAP Display 
 
 
-import streamlit as st
-import plotly.graph_objects as go
 import pandas as pd
-import numpy as np
+import plotly.graph_objects as go
+import streamlit as st
 
-
-# Sample DataFrame with string percentages
-
+# Read the CSV file
 df = pd.read_csv('Hallucination Confidence Score (3).csv')
 
-
 # Convert 'Hallucination Confidence Score' from string percentage to float
-df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') 
+df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float')
 
+# Reshape data for heatmap
+z_data = df.pivot_table(index='Description Original', columns='Review Text Original', values='Hallucination Confidence Score')
+x_labels = z_data.columns
+y_labels = z_data.index
+z_matrix = z_data.values
 
-def get_chart_37340223():
-    import plotly.graph_objects as go
+# Create heatmap
+fig = go.Figure(data=go.Heatmap(
+                   z=z_matrix,
+                   x=x_labels,
+                   y=y_labels,
+                   hoverongaps=False))
 
-    fig = go.Figure(data=go.Heatmap(
-                       z=[df['Hallucination Confidence Score']],
-                       x=[df['Review Text Original']],
-                       y=[df['Description Original']],
-                       hoverongaps = False))
-
-    tab1, tab2 = st.tabs(["Streamlit theme (default)", "Plotly native theme"])
-    with tab1:
-        st.plotly_chart(fig, theme="streamlit")
-    with tab2:
-        st.plotly_chart(fig, theme=None)
-
-
-
+# Streamlit interface
+tab1, tab2 = st.tabs(["Streamlit theme (default)", "Plotly native theme"])
+with tab1:
+    st.plotly_chart(fig, theme="streamlit")
+with tab2:
+    st.plotly_chart(fig, theme=None)
 
 
 # Display HCS
