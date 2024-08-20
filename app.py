@@ -193,7 +193,7 @@ heatmap = go.Figure(data=go.Heatmap(
     colorbar=dict(title="Confidence Score")  # Colorbar label
 ))
 
-# Adjust layout to handle large number of entries
+# Update layout to ensure square cells
 heatmap.update_layout(
     title='Interactive Heatmap of Hallucination Confidence Scores',
     xaxis_title='Index',
@@ -201,15 +201,18 @@ heatmap.update_layout(
     xaxis=dict(
         ticks='',  # Remove ticks
         showticklabels=False,  # Hide tick labels
-        scaleanchor="y"  # Lock aspect ratio of x-axis to y-axis
+        scaleanchor='y',  # Lock aspect ratio of x-axis to y-axis
+        scaleratio=1  # Ensure squares by setting equal scaling
     ),
     yaxis=dict(
         ticks='',  # Remove ticks
-        showticklabels=False  # Hide tick labels
+        showticklabels=False,  # Hide tick labels
+        scaleanchor='x',  # Lock aspect ratio of y-axis to x-axis
+        scaleratio=1  # Ensure squares by setting equal scaling
     ),
-    autosize=True,  # Allow auto sizing to fit content
+    autosize=False,
     width=1200,  # Adjust width to fit more data
-    height=600,  # Adjust height to fit more data
+    height=800,  # Adjust height to ensure cells are square
     dragmode='zoom'  # Enable zoom and pan functionality
 )
 
