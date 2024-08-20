@@ -166,4 +166,32 @@ sorted_bigrams = sorted(bigram_freq.items(), key=lambda x: x[1], reverse=True)[:
 bigram_df = pd.DataFrame(sorted_bigrams, columns=['Bigram', 'Frequency'])
 st.dataframe(bigram_df)
 
+#HEATMAP Display 
+
+import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
+
+
+data = hallucinations
+
+# Create the heatmap with hover data
+heatmap = go.Figure(data=go.Heatmap(
+    z=df['Hallucination Confidence Score'],
+    x=df.index,  # Using index for the x-axis
+    y=["Metric"],  # Single row for simplicity
+    text=[f"Review: {r}<br>Description: {d}" for r, d in zip(df['Review Text Original'], df['Description Original'])],
+    hoverinfo="text",
+    colorscale='Viridis'
+))
+
+# Add title
+heatmap.update_layout(
+    title='Interactive Heatmap of Hallucination Scores',
+    xaxis_nticks=36
+)
+
+# Display the heatmap in Streamlit
+st.plotly_chart(heatmap)
+
 
