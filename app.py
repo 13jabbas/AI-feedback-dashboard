@@ -177,22 +177,13 @@ df = pd.read_csv('Hallucination Confidence Score (3).csv')
 # Convert 'Hallucination Confidence Score' from string percentage to float
 df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
 
-st.title("Hallucination Confidence Scores Dashboard")
+st.title("Hallucination Confidence Scores")
 
-tab1, tab2, tab3 = st.tabs(["Scores", "Reviews", "Descriptions"])
+# Display the dataframe with interactive features
+st.dataframe(df)
 
-with tab1:
-    st.header("Scores")
-    st.dataframe(df[['Hallucination Confidence Score']])
+# Optionally, add filters
+confidence_threshold = st.slider("Filter by confidence score", 0.0, 1.0, 0.0)
+filtered_df = df[df['Hallucination Confidence Score'] >= confidence_threshold]
 
-with tab2:
-    st.header("Reviews")
-    for index, row in df.iterrows():
-        st.subheader(f"Score: {row['Hallucination Confidence Score']:.2%}")
-        st.write(row['Review Text Original'])
-
-with tab3:
-    st.header("Descriptions")
-    for index, row in df.iterrows():
-        st.subheader(f"Score: {row['Hallucination Confidence Score']:.2%}")
-        st.write(row['Description Original'])
+st.dataframe(filtered_df)
