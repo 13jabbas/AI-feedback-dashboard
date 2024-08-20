@@ -178,7 +178,7 @@ df = pd.read_csv('Hallucination Confidence Score (3).csv')
 
 
 # Convert 'Hallucination Confidence Score' from string percentage to float
-df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
+df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') 
 
 
 
@@ -192,6 +192,26 @@ heatmap = go.Figure(data=go.Heatmap(
     colorscale='Viridis',  # Color gradient
     colorbar=dict(title="Confidence Score")  # Colorbar label
 ))
+
+# Update layout to make entries appear as squares
+heatmap.update_layout(
+    title='Interactive Heatmap of Hallucination Confidence Scores',
+    xaxis_title='Index',
+    yaxis_title='Scores',
+    xaxis=dict(
+        ticks='',  # Remove ticks
+        showticklabels=False,  # Hide tick labels
+        scaleanchor="y"  # Lock aspect ratio of x-axis to y-axis
+    ),
+    yaxis=dict(
+        ticks='',  # Remove ticks
+        showticklabels=False  # Hide tick labels
+    ),
+    autosize=False,
+    width=600,  # Adjust width to your needs
+    height=400   # Adjust height to match width for square cells
+)
+
 
 # Add title
 heatmap.update_layout(
