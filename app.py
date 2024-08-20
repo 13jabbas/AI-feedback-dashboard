@@ -168,8 +168,6 @@ st.dataframe(bigram_df)
 
 #HEATMAP Display 
 
-
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -181,8 +179,12 @@ df = pd.read_csv('Hallucination Confidence Score (3).csv')
 df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
 
 def get_chart_79075482():
+    # Limit the size of the dataset to avoid overloading
+    max_rows = 50  # Adjust this number as needed to reduce data size
+    limited_df = df.head(max_rows)
+
     # Reshape data for heatmap using pivot_table
-    heatmap_data = df.pivot_table(index='Description Original', columns='Review Text Original', values='Hallucination Confidence Score')
+    heatmap_data = limited_df.pivot_table(index='Description Original', columns='Review Text Original', values='Hallucination Confidence Score', aggfunc='mean')
 
     # Create heatmap without displaying axis labels
     fig = px.imshow(
@@ -192,7 +194,15 @@ def get_chart_79075482():
         text_auto=True,
     )
     
-    
+    # Update hover information
+    fig.update_traces(
+        hovertemplate=(
+            "Review: %{x}<br>"
+            "Description: %{y}<br>"
+            "Confidence Score: %{z:.2%}<extra></extra>"
+        )
+    )
+
     # Update layout to remove axis labels
     fig.update_xaxes(showticklabels=False)
     fig.update_yaxes(showticklabels=False)
