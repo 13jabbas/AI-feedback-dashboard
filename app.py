@@ -223,3 +223,10 @@ HCS_df = df['Hallucination Confidence Score']
 st.dataframe(HCS_df)
 
 
+
+fig = px.sunburst(df, path=['Description Original', 'Review Text Original'],
+                  values='Hallucination Confidence Score',
+                  color='Hallucination Confidence Score',
+                  title='Sunburst Chart of Hallucination Confidence Scores')
+
+st.plotly_chart(fig)
