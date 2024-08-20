@@ -172,11 +172,13 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
+# Sample DataFrame with string percentages
+
 data = pd.read_csv('Hallucination Confidence Score (3).csv')
 
 df = pd.DataFrame(data)
 
-# Convert 'Hallucination Confidence Score' to float
+# Convert 'Hallucination Confidence Score' from string percentage to float
 df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
 
 # Create the heatmap with hover data
@@ -197,3 +199,4 @@ heatmap.update_layout(
 
 # Display the heatmap in Streamlit
 st.plotly_chart(heatmap)
+
