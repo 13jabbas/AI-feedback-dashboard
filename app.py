@@ -169,6 +169,7 @@ st.dataframe(bigram_df)
 #HEATMAP Display 
 
 import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
 
 # Read the CSV file
@@ -177,13 +178,38 @@ df = pd.read_csv('Hallucination Confidence Score (3).csv')
 # Convert 'Hallucination Confidence Score' from string percentage to float
 df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
 
+# Function to create the gauge
+def create_gauge(score):
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=score * 100,  # Convert to percentage for display
+        gauge={
+            'axis': {'range': [0, 100]},
+            'bar': {'color': 'rgba(0,0,0,0)'},  # Hide the default bar
+            'steps': [
+                {'range': [0, 20], 'color': 'green'},
+                {'range': [20, 40], 'color': 'yellowgreen'},
+                {'range': [40, 60], 'color': 'yellow'},
+                {'range': [60, 80], 'color': 'orange'},
+                {'range': [80, 100], 'color': 'red'}
+            ],
+        },
+        number={'suffix': "%"}
+    ))
+    fig.update_layout(height=150, margin=dict(l=20, r=20, t=40, b=20))
+    return fig
+
 st.title("Hallucination Confidence Scores")
 
 # Display the dataframe with interactive features
-st.dataframe(df)
-
-# Optionally, add filters
 confidence_threshold = st.slider("Filter by confidence score", 0.0, 1.0, 0.0)
 filtered_df = df[df['Hallucination Confidence Score'] >= confidence_threshold]
 
-st.dataframe(filtered_df)
+for index, row in filtered_df.iterrows():
+    st.subheader(f"Review {index + 1}")
+    st.write(f"**Review:** {row['Review Text Original']}")
+    st.write(f"**Description:** {row['Description Original']}")
+    
+    # Add the gauge for the confidence score
+    st.plotly_chart(create_gauge(row['Hallucination Confidence Score']), use_container_width=True)
+    st.markdown("---")
