@@ -172,8 +172,12 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
+data = pd.read_csv('Hallucination Confidence Score (3).csv')
 
-data = hallucinations
+df = pd.DataFrame(data)
+
+# Convert 'Hallucination Confidence Score' to float
+df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
 
 # Create the heatmap with hover data
 heatmap = go.Figure(data=go.Heatmap(
@@ -187,11 +191,9 @@ heatmap = go.Figure(data=go.Heatmap(
 
 # Add title
 heatmap.update_layout(
-    title='Interactive Heatmap of Hallucination Scores',
+    title='Interactive Heatmap of Hallucination Confidence Scores',
     xaxis_nticks=36
 )
 
 # Display the heatmap in Streamlit
 st.plotly_chart(heatmap)
-
-
