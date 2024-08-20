@@ -180,9 +180,7 @@ df = pd.read_csv('Hallucination Confidence Score (3).csv')
 # Convert 'Hallucination Confidence Score' from string percentage to float
 df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
 
-# Print converted values for debugging
-print("Converted Hallucination Confidence Scores:")
-print(df['Hallucination Confidence Score']) 
+
 
 # Create the heatmap with hover data
 heatmap = go.Figure(data=go.Heatmap(
@@ -203,3 +201,9 @@ heatmap.update_layout(
 # Display the heatmap in Streamlit
 st.plotly_chart(heatmap)
 
+
+
+
+# Print converted values for debugging
+print("Converted Hallucination Confidence Scores:")
+print(df['Hallucination Confidence Score']) 
