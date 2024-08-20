@@ -183,60 +183,22 @@ df = pd.read_csv('Hallucination Confidence Score (3).csv')
 # Convert 'Hallucination Confidence Score' from string percentage to float
 df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') 
 
-# Create a pivot table for the heatmap
-heatmap_data = df.pivot(
-    index='Description Original',
-    columns='Review Text Original',
-    values='Hallucination Confidence Score'
-)
+@st.experimental_memo
+def get_chart_37340223():
+    import plotly.graph_objects as go
 
-# Ensure that the pivot table has no NaNs by filling with zeros or another appropriate value
-heatmap_data = heatmap_data.fillna(0)
+    fig = go.Figure(data=go.Heatmap(
+                       z=[df['Hallucination Confidence Score']],
+                       x=[df['Review Text Original']],
+                       y=[df['Description Original']],
+                       hoverongaps = False))
 
-# Create the heatmap with hover data
-fig = go.Figure(data=go.Heatmap(
-    z=heatmap_data.values,  # 2D array of heatmap values
-    x=heatmap_data.columns,  # Review Text Original as x-axis
-    y=heatmap_data.index,  # Description Original as y-axis
-    text=heatmap_data.apply(lambda row: [f"Review: {review}<br>Description: {desc}<br>Score: {score:.2f}" 
-                                        for review, score in zip(row.index, row.values)], axis=1).tolist(),
-    hoverinfo="text",
-    colorscale='Viridis',  # Color gradient
-    colorbar=dict(title="Confidence Score"),  # Colorbar label
-    zmin=0,  # Optional: Set minimum value for color scale
-    zmax=1   # Optional: Set maximum value for color scale
-))
+    tab1, tab2 = st.tabs(["Streamlit theme (default)", "Plotly native theme"])
+    with tab1:
+        st.plotly_chart(fig, theme="streamlit")
+    with tab2:
+        st.plotly_chart(fig, theme=None)
 
-# Update layout to ensure square cells
-fig.update_layout(
-    title='Interactive Heatmap of Hallucination Confidence Scores',
-    xaxis_title='Review Text Original',
-    yaxis_title='Description Original',
-    xaxis=dict(
-        tickangle=-45,  # Rotate x-axis labels for better readability
-        ticks='',  # Remove ticks
-        showticklabels=True,  # Show x-axis labels
-        scaleanchor='y',  # Lock aspect ratio of x-axis to y-axis
-        scaleratio=1  # Ensure squares by setting equal scaling
-    ),
-    yaxis=dict(
-        ticks='',  # Remove ticks
-        showticklabels=True,  # Show y-axis labels
-        scaleanchor='x',  # Lock aspect ratio of y-axis to x-axis
-        scaleratio=1  # Ensure squares by setting equal scaling
-    ),
-    autosize=False,
-    width=1200,  # Adjust width to fit more data
-    height=1200,  # Adjust height to ensure cells are square
-    dragmode='zoom'  # Enable zoom and pan functionality
-)
-
-# Display the heatmap in Streamlit
-tab1, tab2 = st.tabs(["Streamlit theme (default)", "Plotly native theme"])
-with tab1:
-    st.plotly_chart(fig, theme="streamlit")
-with tab2:
-    st.plotly_chart(fig, theme=None)
 
 
 
