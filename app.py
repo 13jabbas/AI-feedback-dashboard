@@ -183,7 +183,7 @@ df = pd.read_csv('Hallucination Confidence Score (3).csv')
 # Convert 'Hallucination Confidence Score' from string percentage to float
 df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') 
 
-@st.experimental_memo
+
 def get_chart_37340223():
     import plotly.graph_objects as go
 
