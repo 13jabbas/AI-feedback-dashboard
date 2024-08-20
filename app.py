@@ -190,7 +190,9 @@ heatmap = go.Figure(data=go.Heatmap(
     text=[f"Review: {r}<br>Description: {d}" for r, d in zip(df['Review Text Original'], df['Description Original'])],
     hoverinfo="text",
     colorscale='Viridis',  # Color gradient
-    colorbar=dict(title="Confidence Score")  # Colorbar label
+    colorbar=dict(title="Confidence Score"),  # Colorbar label
+    zmin=0,  # Optional: Set minimum value for color scale
+    zmax=1   # Optional: Set maximum value for color scale
 ))
 
 # Update layout to ensure square cells
@@ -201,19 +203,16 @@ heatmap.update_layout(
     xaxis=dict(
         ticks='',  # Remove ticks
         showticklabels=False,  # Hide tick labels
-        scaleanchor='y',  # Lock aspect ratio of x-axis to y-axis
-        scaleratio=1  # Ensure squares by setting equal scaling
     ),
     yaxis=dict(
         ticks='',  # Remove ticks
         showticklabels=False,  # Hide tick labels
-        scaleanchor='x',  # Lock aspect ratio of y-axis to x-axis
-        scaleratio=1  # Ensure squares by setting equal scaling
     ),
     autosize=False,
-    width=1200,  # Adjust width to fit more data
-    height=800,  # Adjust height to ensure cells are square
-    dragmode='zoom'  # Enable zoom and pan functionality
+    width=1000,  # Adjust width based on the number of entries
+    height=1000,  # Adjust height to ensure cells are square
+    dragmode='zoom',  # Enable zoom and pan functionality
+    aspectratio=dict(x=1, y=1)  # Ensure square cells
 )
 
 
