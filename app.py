@@ -169,7 +169,7 @@ st.dataframe(bigram_df)
 #HEATMAP Display 
 
 
-@st.experimental_memo
+
 def get_chart_79075482():
     import plotly.express as px
 
