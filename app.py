@@ -193,8 +193,6 @@ def get_chart_79075482():
     )
     
     
-    
-
     # Update layout to remove axis labels
     fig.update_xaxes(showticklabels=False)
     fig.update_yaxes(showticklabels=False)
