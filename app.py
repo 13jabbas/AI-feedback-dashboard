@@ -115,16 +115,7 @@ with col2:
     fig_gauges.update_layout(height=400, width=1200, title_text=f"Accuracy Gauges for {selected_entity}")
     st.plotly_chart(fig_gauges)
 
-    # Display ROC curve for selected entity
-    st.subheader("ROC Curve")
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.plot(metrics['FPR'], metrics['TPR'], label=f"{selected_entity} (AUC = {metrics['AUC']:.2f})")
-    ax.plot([0, 1], [0, 1], 'k--', label="Random Guessing (AUC = 0.50)")
-    ax.set_xlabel('False Positive Rate')
-    ax.set_ylabel('True Positive Rate')
-    ax.set_title(f'ROC Curve for {selected_entity}')
-    ax.legend(loc='lower right')
-    st.pyplot(fig)
+   
 
 # Add a section for displaying entities ordered by accuracy in the third column
 with col3:
