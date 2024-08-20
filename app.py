@@ -179,7 +179,7 @@ data = pd.read_csv('Hallucination Confidence Score (3).csv')
 df = pd.DataFrame(data)
 
 # Convert 'Hallucination Confidence Score' from string percentage to float
-df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
+df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') 
 
 # Create the heatmap with hover data
 heatmap = go.Figure(data=go.Heatmap(
