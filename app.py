@@ -192,14 +192,8 @@ def get_chart_79075482():
         text_auto=True,
     )
     
-    # Update hover information
-    fig.update_traces(
-        hovertemplate=(
-            "Review: %{x}<br>"
-            "Description: %{y}<br>"
-            "Confidence Score: %{z:.2%}<extra></extra>"
-        )
-    )
+    
+    
 
     # Update layout to remove axis labels
     fig.update_xaxes(showticklabels=False)
