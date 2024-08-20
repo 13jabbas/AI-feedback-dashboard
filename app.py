@@ -178,26 +178,43 @@ import streamlit as st
 df = pd.read_csv('Hallucination Confidence Score (3).csv')
 
 # Convert 'Hallucination Confidence Score' from string percentage to float
-df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') /100
-
+df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
 
 def get_chart_79075482():
-    import plotly.express as px
+    # Reshape data for heatmap using pivot_table
+    heatmap_data = df.pivot_table(index='Description Original', columns='Review Text Original', values='Hallucination Confidence Score')
 
-    z = [df['Hallucination Confidence Score']]
-    x=[df['Review Text Original']],
-    y=[df['Description Original']],
+    # Create heatmap without displaying axis labels
+    fig = px.imshow(
+        heatmap_data.values, 
+        aspect="auto",
+        labels=dict(x="", y="", color="Hallucination Confidence Score"),
+        text_auto=True,
+    )
     
-    fig = px.imshow(z, text_auto=True, aspect="auto")
+    # Update hover information
+    fig.update_traces(
+        hovertemplate=(
+            "Review: %{x}<br>"
+            "Description: %{y}<br>"
+            "Confidence Score: %{z:.2%}<extra></extra>"
+        )
+    )
 
+    # Update layout to remove axis labels
+    fig.update_xaxes(showticklabels=False)
+    fig.update_yaxes(showticklabels=False)
+
+    # Streamlit interface
     tab1, tab2 = st.tabs(["Streamlit theme (default)", "Plotly native theme"])
     with tab1:
         st.plotly_chart(fig, theme="streamlit")
     with tab2:
         st.plotly_chart(fig, theme=None)
 
-
+# Call the function to display the chart
 get_chart_79075482()
+
 
 # Display HCS
 HCS_df = df['Hallucination Confidence Score']
