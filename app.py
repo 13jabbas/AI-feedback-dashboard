@@ -141,21 +141,6 @@ st.header("Hallucinations Analysis")
 
 
 
-# Bigram analysis
-st.subheader("Top 10 Most Common Bigrams")
-
-# Generate bigrams
-vectorizer = CountVectorizer(ngram_range=(2, 2))
-X = vectorizer.fit_transform(new_df['Description'].astype(str))
-bigrams = vectorizer.get_feature_names_out()
-bigram_counts = X.sum(axis=0).A1
-bigram_freq = dict(zip(bigrams, bigram_counts))
-sorted_bigrams = sorted(bigram_freq.items(), key=lambda x: x[1], reverse=True)[:10]
-
-# Display top 10 bigrams
-bigram_df = pd.DataFrame(sorted_bigrams, columns=['Bigram', 'Frequency'])
-st.dataframe(bigram_df)
-
 #HEATMAP Display 
 
 import pandas as pd
