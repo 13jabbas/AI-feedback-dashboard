@@ -24,11 +24,9 @@ def load_data():
 
 df, hallucinations = load_data()
 
-# Streamlit Title and description
-st.title("LLM Performance Dashboard")
 
-# Layout for the entities section with metrics
-st.header("Entity Metrics")
+
+
 
 # Create a three-column layout
 col1, col2, col3 = st.columns([1, 4, 2])  # col1 for the dropdown, col2 for gauges and ROC curve, col3 for entities list
