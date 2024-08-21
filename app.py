@@ -28,8 +28,7 @@ if show_sidebar:
 
         st.write(f"You selected: {llm_version}")
 
-# Main content area
-st.write("This is the main content area.")
+
 
 # Load data
 @st.cache_data
@@ -126,7 +125,7 @@ with col2:
         gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "red"}}
     ), row=1, col=4)
 
-    fig_gauges.update_layout(height=400, width=1200, title_text=f"Accuracy Gauges for {selected_entity}")
+    fig_gauges.update_layout(height=400, width=1200, title_text=f"{selected_entity}")
     st.plotly_chart(fig_gauges)
 
    
