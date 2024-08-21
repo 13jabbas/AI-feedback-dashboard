@@ -16,14 +16,13 @@ st.set_page_config(layout="wide")
 
 #SIDE BAR LLM VERSION SELECTOR
 
-st.title("Main Content")
 
 # Create a toggle button for showing/hiding the sidebar content
-show_sidebar = st.checkbox("Show Sidebar Options", value=False)
+show_sidebar = st.checkbox("Show LLM Versions", value=False)
 
 if show_sidebar:
     with st.sidebar:
-        st.header("Sidebar Content")
+        st.header("")
         # Add a dropdown selector with the specified options
         llm_version = st.selectbox("Select LLM Version", ["LLM V1", "LLM V2", "LLM V3"])
 
