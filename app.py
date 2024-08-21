@@ -219,6 +219,7 @@ paginated_df = filtered_df.iloc[start_idx:end_idx]
 for i, row in paginated_df.iterrows():
     st.subheader(f"Review {start_idx + i + 1}")
     st.write(f"**Review:** {row['Review Text Original']}")
+    st.write(f"**Annotation:** {row['Annotated Text']}")
     st.write(f"**Description:** {row['Description Original']}")
     
     # Add the gauge for the confidence score
