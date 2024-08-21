@@ -135,7 +135,7 @@ with col3:
     st.subheader("Entities Ordered by Accuracy")
 
     # Add headings for 'Entity' and 'Accuracy'
-    st.markdown("<b>Entity</b> | <b>Accuracy</b>", unsafe_allow_html=True)
+    st.markdown("<b>Entity</b> |     <b>Accuracy</b>", unsafe_allow_html=True)
 
     # Sort entities based on their AUC score in descending order
     sorted_entities = sorted(results.items(), key=lambda x: x[1]['AUC'], reverse=True)
