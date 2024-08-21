@@ -206,15 +206,22 @@ filtered_df = df[df['Hallucination Confidence Score'] >= confidence_threshold]
 # Pagination
 page_size = 10
 total_pages = (len(filtered_df) - 1) // page_size + 1
+
+# Ensure total_pages is at least 1
+if total_pages < 1:
+    total_pages = 1
+
 page = st.number_input("Page", min_value=1, max_value=total_pages, step=1, value=1)
 
 # Calculate start and end index for the current page
 start_idx = (page - 1) * page_size
 end_idx = start_idx + page_size
+
+# Display only the relevant slice of the dataframe
 paginated_df = filtered_df.iloc[start_idx:end_idx]
 
-for index, row in paginated_df.iterrows():
-    st.subheader(f"Review {start_idx + index + 1}")
+for i, row in paginated_df.iterrows():
+    st.subheader(f"Review {start_idx + i + 1}")
     st.write(f"**Review:** {row['Review Text Original']}")
     st.write(f"**Description:** {row['Description Original']}")
     
