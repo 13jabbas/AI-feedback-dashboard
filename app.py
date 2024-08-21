@@ -139,15 +139,7 @@ with col3:
 # Add another section for hallucinations
 st.header("Hallucinations Analysis")
 
-# Word Cloud for Hallucinations
-st.subheader("Word Cloud for Hallucinations")
-new_df = hallucinations[hallucinations['Keyword Match Count'] == 0]
-text = ' '.join(new_df['Description'].astype(str))
-wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='BuPu').generate(text)
-fig_wordcloud, ax = plt.subplots(figsize=(10, 5))
-ax.imshow(wordcloud, interpolation='bilinear')
-ax.axis('off')
-st.pyplot(fig_wordcloud)
+
 
 # Bigram analysis
 st.subheader("Top 10 Most Common Bigrams")
