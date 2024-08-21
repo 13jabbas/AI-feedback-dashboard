@@ -189,12 +189,8 @@ def create_gauge(score):
     fig.update_layout(height=150, margin=dict(l=20, r=20, t=40, b=20))
     return fig
 
-st.title("Hallucination Confidence Scores")
-
-# Interactive filter by confidence score
+# Display the dataframe with interactive features
 confidence_threshold = st.slider("Filter by confidence score", 0.0, 1.0, 0.0)
-
-# Filter the dataframe based on the selected confidence threshold
 filtered_df = df[df['Hallucination Confidence Score'] >= confidence_threshold]
 
 # Pagination
@@ -219,6 +215,7 @@ end_idx = start_idx + page_size
 # Display only the relevant slice of the dataframe
 paginated_df = filtered_df.iloc[start_idx:end_idx]
 
+# Loop through the paginated dataframe and display content
 for i, row in paginated_df.iterrows():
     st.subheader(f"Review {start_idx + i + 1}")
     st.write(f"**Review:** {row['Review Text Original']}")
