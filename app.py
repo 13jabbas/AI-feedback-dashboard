@@ -91,7 +91,7 @@ with col1:
 
 # Display the metrics for the selected entity as gauges
 with col2:
-    st.subheader(f"Metrics Gauges for {selected_entity}")
+    st.subheader(f"{selected_entity}")
     metrics = results[selected_entity]
 
     # Create gauges for each metric using Plotly
