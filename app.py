@@ -14,6 +14,23 @@ from collections import Counter
 # Set page configuration
 st.set_page_config(layout="wide")
 
+#SIDE BAR LLM VERSION SELECTOR
+
+st.title("Main Content")
+
+# Create a toggle button for showing/hiding the sidebar content
+show_sidebar = st.checkbox("Show Sidebar Options", value=False)
+
+if show_sidebar:
+    with st.sidebar:
+        st.header("Sidebar Content")
+        # Add a dropdown selector with the specified options
+        llm_version = st.selectbox("Select LLM Version", ["LLM V1", "LLM V2", "LLM V3"])
+
+        st.write(f"You selected: {llm_version}")
+
+# Main content area
+st.write("This is the main content area.")
 
 # Load data
 @st.cache_data
