@@ -118,12 +118,7 @@ with col2:
         gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "orange"}}
     ), row=1, col=3)
 
-    fig_gauges.add_trace(go.Indicator(
-        mode="gauge+number",
-        value=metrics['AUC'] * 100,
-        title={'text': "AUC"},
-        gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "red"}}
-    ), row=1, col=4)
+
 
     fig_gauges.update_layout(height=400, width=1200, title_text=f"{selected_entity}")
     st.plotly_chart(fig_gauges)
