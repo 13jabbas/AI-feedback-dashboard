@@ -95,7 +95,7 @@ with col2:
     metrics = results[selected_entity]
 
     # Create gauges for each metric using Plotly
-    fig_gauges = make_subplots(rows=1, cols=4, subplot_titles=["Micro F1 Score", "Precision", "Recall", "AUC"], specs=[[{'type': 'indicator'}] * 4])
+    fig_gauges = make_subplots(rows=1, cols=4, subplot_titles=["Micro F1 Score", "Precision", "Recall"], specs=[[{'type': 'indicator'}] * 4])
 
     fig_gauges.add_trace(go.Indicator(
         mode="gauge+number",
