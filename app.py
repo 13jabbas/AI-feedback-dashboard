@@ -199,8 +199,10 @@ def create_gauge(score):
 
 st.title("Hallucination Confidence Scores")
 
-# Display the dataframe with interactive features
+# Interactive filter by confidence score
 confidence_threshold = st.slider("Filter by confidence score", 0.0, 1.0, 0.0)
+
+# Filter the dataframe based on the selected confidence threshold
 filtered_df = df[df['Hallucination Confidence Score'] >= confidence_threshold]
 
 # Pagination
@@ -211,7 +213,12 @@ total_pages = (len(filtered_df) - 1) // page_size + 1
 if total_pages < 1:
     total_pages = 1
 
-page = st.number_input("Page", min_value=1, max_value=total_pages, step=1, value=1)
+# Reset page number to 1 if confidence threshold changes
+page = st.session_state.get('page', 1)
+if 'confidence_threshold_value' not in st.session_state or st.session_state['confidence_threshold_value'] != confidence_threshold:
+    st.session_state['confidence_threshold_value'] = confidence_threshold
+    page = 1
+st.session_state['page'] = st.number_input("Page", min_value=1, max_value=total_pages, step=1, value=page)
 
 # Calculate start and end index for the current page
 start_idx = (page - 1) * page_size
