@@ -86,7 +86,7 @@ results = evaluate_metrics(df, columns_to_evaluate)
 
 # Sidebar for dropdown selection
 with col1:
-    st.subheader("Select Entity to View Metrics")
+
     selected_entity = st.selectbox("Choose an entity", columns_to_evaluate)
 
 # Display the metrics for the selected entity as gauges
