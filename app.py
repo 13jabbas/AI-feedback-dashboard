@@ -1,4 +1,102 @@
 
+# PACKAGES
+
+import streamlit as st
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, roc_curve
+from sklearn.preprocessing import label_binarize, LabelEncoder
+from wordcloud import WordCloud
+from collections import Counter
+
+# Set page configuration
+st.set_page_config(layout="wide")
+
+# SIDE BAR LLM VERSION SELECTOR
+
+# Create a toggle button for showing/hiding the sidebar content
+show_sidebar = st.checkbox("Show LLM Versions", value=False)
+
+if show_sidebar:
+    with st.sidebar:
+        st.header("")
+        # Add a dropdown selector with the specified options
+        llm_version = st.selectbox("Select LLM Version", ["LLM V1", "LLM V2", "LLM V3"])
+        st.write(f"You selected: {llm_version}")
+
+# Load data
+@st.cache_data
+def load_data():
+    df = pd.read_csv('LLMNER.csv')  # Modify path as needed
+    hallucinations = pd.read_csv('Hallucination Confidence Score (3).csv')  # Modify path as needed
+    return df, hallucinations
+
+df, hallucinations = load_data()
+
+# Create a three-column layout
+col1, col2, col3 = st.columns([1, 4, 2])  # col1 for the dropdown, col2 for gauges and ROC curve, col3 for entities list
+
+# Columns to evaluate
+columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
+
+# Dictionary to store the results
+results = {}
+
+for col in columns_to_evaluate:
+    # True labels and predicted labels, ensuring NaNs are handled
+    y_true = df[f'{col} Checked'].dropna()
+    y_pred = df[col].dropna()
+
+    # Get the common indices to ensure lengths match
+    common_indices = y_true.index.intersection(y_pred.index)
+    y_true = y_true.loc[common_indices]
+    y_pred = y_pred.loc[common_indices]
+
+    # Ensure the lengths match after aligning
+    if len(y_true) != len(y_pred):
+        raise ValueError(f"Length mismatch between true and predicted labels for {col}")
+
+    # Combine y_true and y_pred before fitting LabelEncoder
+    combined_labels = pd.concat([y_true, y_pred])
+    le = LabelEncoder()
+    le.fit(combined_labels)
+
+    y_true_encoded = le.transform(y_true)
+    y_pred_encoded = le.transform(y_pred)
+
+    # Macro F1 score
+    macro_f1 = f1_score(y_true_encoded, y_pred_encoded, average='macro')
+
+    # Macro Precision and Recall
+    precision = precision_score(y_true_encoded, y_pred_encoded, average='macro')
+    recall = recall_score(y_true_encoded, y_pred_encoded, average='macro')
+
+    # AUC
+    # Label binarization is required for multiclass/multilabel AUC calculation
+    classes = le.classes_
+    y_true_binarized = label_binarize(y_true_encoded, classes=range(len(classes)))
+    y_pred_binarized = label_binarize(y_pred_encoded, classes=range(len(classes)))
+
+    # Handle binary and multi-class cases differently for AUC
+    if y_true_binarized.shape[1] == 1:  # binary case
+        auc = roc_auc_score(y_true_encoded, y_pred_encoded)
+        fpr, tpr, _ = roc_curve(y_true_encoded, y_pred_encoded)
+    else:  # multi-class case
+        auc = roc_auc_score(y_true_binarized, y_pred_binarized, average='micro')
+        fpr, tpr, _ = roc_curve(y_true_binarized.ravel(), y_pred_binarized.ravel())
+
+    # Store results
+    results[col] = {
+        'Macro F1 Score': macro_f1,
+        'Precision (Macro)': precision,
+        'Recall (Macro)': recall,
+        'AUC': auc,
+        'FPR': fpr,
+        'TPR': tpr
+    }
+
 # Plot the ROC curves
 plt.figure(figsize=(12, 8))
 for col, metrics in results.items():
@@ -37,7 +135,6 @@ results_df = pd.DataFrame(table_data)
 st.dataframe(results_df)  # Use st.dataframe instead of print
 
 # Optionally display the table visually
-# If you want a visual representation of the table as a matplotlib figure
 fig, ax = plt.subplots(figsize=(10, 6))  # Set the figure size
 ax.axis('off')
 ax.axis('tight')
@@ -45,6 +142,7 @@ ax.table(cellText=results_df.values, colLabels=results_df.columns, cellLoc='cent
 
 # Again, use st.pyplot
 st.pyplot(fig)
+
 
 #HEATMAP Display 
 
