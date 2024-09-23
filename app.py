@@ -41,114 +41,111 @@ df, hallucinations = load_data()
 # Create a three-column layout
 col1, col2, col3 = st.columns([1, 4, 2])  # col1 for the dropdown, col2 for gauges and ROC curve, col3 for entities list
 
-# Function to evaluate metrics
-def evaluate_metrics(df, columns_to_evaluate):
-    results = {}
-    for col in columns_to_evaluate:
-        y_true = df[f'{col} Checked'].dropna()
-        y_pred = df[col].dropna()
-        common_indices = y_true.index.intersection(y_pred.index)
-        y_true = y_true.loc[common_indices]
-        y_pred = y_pred.loc[common_indices]
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder, label_binarize
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, roc_curve
+import matplotlib.pyplot as plt
 
-        le = LabelEncoder()
-        combined_labels = pd.concat([y_true, y_pred])
-        le.fit(combined_labels)
-        y_true_encoded = le.transform(y_true)
-        y_pred_encoded = le.transform(y_pred)
-
-        # Use macro averaging
-        macro_f1 = f1_score(y_true_encoded, y_pred_encoded, average='macro')
-        precision = precision_score(y_true_encoded, y_pred_encoded, average='macro')
-        recall = recall_score(y_true_encoded, y_pred_encoded, average='macro')
-        
-        classes = le.classes_
-        y_true_binarized = label_binarize(y_true_encoded, classes=range(len(classes)))
-        y_pred_binarized = label_binarize(y_pred_encoded, classes=range(len(classes)))
-
-        # Handle binary and multi-class AUC calculation
-        if len(classes) == 2:  # Binary case
-            auc = roc_auc_score(y_true_encoded, y_pred_encoded)
-            fpr, tpr, _ = roc_curve(y_true_encoded, y_pred_encoded)
-        else:  # Multi-class case
-            auc = roc_auc_score(y_true_binarized, y_pred_binarized, average='macro', multi_class='ovr')
-            fpr, tpr, _ = roc_curve(y_true_binarized.ravel(), y_pred_binarized.ravel())
-
-        results[col] = {
-            'Macro F1 Score': macro_f1,
-            'Precision': precision,
-            'Recall': recall,
-            'AUC': auc,
-            'FPR': fpr,
-            'TPR': tpr
-        }
-    
-    return results
-
-# Metrics evaluation
+# Columns to evaluate
 columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
-results = evaluate_metrics(df, columns_to_evaluate)
 
-# Sidebar for dropdown selection
-with col1:
-    selected_entity = st.selectbox("Choose an entity", columns_to_evaluate)
+# Dictionary to store the results
+results = {}
 
-# Display the metrics for the selected entity as gauges
-with col2:
-    st.subheader(f"{selected_entity}")
-    metrics = results[selected_entity]
+for col in columns_to_evaluate:
+    # True labels and predicted labels, ensuring NaNs are handled
+    y_true = df[f'{col} Checked'].dropna()
+    y_pred = df[col].dropna()
 
-    # Create gauges for each metric using Plotly
-    fig_gauges = make_subplots(rows=1, cols=4, subplot_titles=["Macro F1 Score", "Precision", "Recall"], specs=[[{'type': 'indicator'}] * 4])
+    # Get the common indices to ensure lengths match
+    common_indices = y_true.index.intersection(y_pred.index)
+    y_true = y_true.loc[common_indices]
+    y_pred = y_pred.loc[common_indices]
 
-    fig_gauges.add_trace(go.Indicator(
-        mode="gauge+number",
-        value=metrics['Macro F1 Score'] * 100,
-        title={'text': "Macro F1 Score"},
-        gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "darkblue"}}
-    ), row=1, col=1)
+    # Ensure the lengths match after aligning
+    if len(y_true) != len(y_pred):
+        raise ValueError(f"Length mismatch between true and predicted labels for {col}")
 
-    fig_gauges.add_trace(go.Indicator(
-        mode="gauge+number",
-        value=metrics['Precision'] * 100,
-        title={'text': "Precision"},
-        gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "green"}}
-    ), row=1, col=2)
+    # Combine y_true and y_pred before fitting LabelEncoder
+    combined_labels = pd.concat([y_true, y_pred])
+    le = LabelEncoder()
+    le.fit(combined_labels)
 
-    fig_gauges.add_trace(go.Indicator(
-        mode="gauge+number",
-        value=metrics['Recall'] * 100,
-        title={'text': "Recall"},
-        gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "orange"}}
-    ), row=1, col=3)
+    y_true_encoded = le.transform(y_true)
+    y_pred_encoded = le.transform(y_pred)
 
-    fig_gauges.update_layout(height=400, width=1200, title_text=f"{selected_entity}")
-    st.plotly_chart(fig_gauges)
+    # Macro F1 score
+    macro_f1 = f1_score(y_true_encoded, y_pred_encoded, average='macro')
 
-# Add a section for displaying entities ordered by accuracy in the third column
-with col3:
-    st.subheader("Entities Ordered by Accuracy")
+    # Macro Precision and Recall
+    precision = precision_score(y_true_encoded, y_pred_encoded, average='macro')
+    recall = recall_score(y_true_encoded, y_pred_encoded, average='macro')
 
-    # Add headings for 'Entity' and 'Accuracy'
-    st.markdown("<b>Entity</b> |     <b>Accuracy</b>", unsafe_allow_html=True)
+    # AUC
+    # Label binarization is required for multiclass/multilabel AUC calculation
+    classes = le.classes_
+    y_true_binarized = label_binarize(y_true_encoded, classes=range(len(classes)))
+    y_pred_binarized = label_binarize(y_pred_encoded, classes=range(len(classes)))
 
-    # Sort entities based on their AUC score in descending order
-    sorted_entities = sorted(results.items(), key=lambda x: x[1]['AUC'], reverse=True)
+    # Handle binary and multi-class cases differently for AUC
+    if y_true_binarized.shape[1] == 1:  # binary case
+        auc = roc_auc_score(y_true_encoded, y_pred_encoded)
+        fpr, tpr, _ = roc_curve(y_true_encoded, y_pred_encoded)
+    else:  # multi-class case
+        auc = roc_auc_score(y_true_binarized, y_pred_binarized, average='micro')
+        fpr, tpr, _ = roc_curve(y_true_binarized.ravel(), y_pred_binarized.ravel())
 
-    # Display the entities in a table-like layout
-    for entity, metrics in sorted_entities:
-        entity_name = f"{entity}"
-        accuracy = f"{metrics['AUC']:.2f}"
+    # Store results
+    results[col] = {
+        'Macro F1 Score': macro_f1,
+        'Precision (Macro)': precision,
+        'Recall (Macro)': recall,
+        'AUC': auc,
+        'FPR': fpr,
+        'TPR': tpr
+    }
 
-        # Create a table-like structure with columns
-        col_ent, col_acc, col_bar = st.columns([3, 2, 4])
-        col_ent.write(entity_name)
-        col_acc.write(accuracy)
-        col_bar.progress(int(metrics['AUC'] * 100))  # Multiplied by 100 to match Streamlit's 0-100 scale
+# Plot the ROC curves
+plt.figure(figsize=(12, 8))
+for col, metrics in results.items():
+    plt.plot(metrics['FPR'], metrics['TPR'], label=f"{col} (AUC = {metrics['AUC']:.2f})")
 
-# Add another section for hallucinations
-st.header("Hallucinations Analysis")
+plt.plot([0, 1], [0, 1], 'k--', label="Random Guessing (AUC = 0.50)")
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('ROC Curves')
+plt.legend(loc='lower right')
+plt.grid()
+plt.show()
 
+# Create a DataFrame for the table
+table_data = {
+    'Column': [],
+    'Macro F1 Score': [],
+    'Precision (Macro)': [],
+    'Recall (Macro)': [],
+    'AUC': []
+}
+
+for col, metrics in results.items():
+    table_data['Column'].append(col)
+    table_data['Macro F1 Score'].append(metrics['Macro F1 Score'])
+    table_data['Precision (Macro)'].append(metrics['Precision (Macro)'])
+    table_data['Recall (Macro)'].append(metrics['Recall (Macro)'])
+    table_data['AUC'].append(metrics['AUC'])
+
+# Convert to DataFrame for display
+results_df = pd.DataFrame(table_data)
+
+# Display the results table
+print(results_df)
+
+# Optionally display the table visually with matplotlib
+fig, ax = plt.subplots(figsize=(10, 6))  # Set the figure size
+ax.axis('off')
+ax.axis('tight')
+ax.table(cellText=results_df.values, colLabels=results_df.columns, cellLoc='center', loc='center')
+plt.show()
 
 #HEATMAP Display 
 
