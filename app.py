@@ -3,7 +3,6 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.preprocessing import label_binarize, LabelEncoder
 import plotly.graph_objects as go
@@ -121,15 +120,10 @@ ranked_metrics = pd.DataFrame(results).T
 ranked_metrics['Average'] = ranked_metrics[['Macro F1 Score', 'Precision (Macro)', 'Recall (Macro)']].mean(axis=1)
 ranked_metrics = ranked_metrics.sort_values(by='Average', ascending=False)
 
-# Bar chart for ranking
-bar_fig = px.bar(ranked_metrics, x=ranked_metrics.index, y='Average',
-                  title='Entity Ranking by Average Metrics',
-                  labels={'index': 'Entity', 'Average': 'Average Score'},
-                  color='Average',
-                  color_continuous_scale=px.colors.sequential.Viridis)
-
-# Display the bar chart
-st.plotly_chart(bar_fig)
+# Leaderboard display
+st.subheader("Entity Leaderboard")
+for index, row in ranked_metrics.iterrows():
+    st.write(f"**{index}:** Average Score = {row['Average']:.2f}")
 
 # Plot the ROC curves for each entity
 for col in columns_to_evaluate:
