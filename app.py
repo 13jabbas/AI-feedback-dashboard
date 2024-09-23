@@ -5,11 +5,8 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, roc_curve
 from sklearn.preprocessing import label_binarize, LabelEncoder
-from wordcloud import WordCloud
-from collections import Counter
 
 # Set page configuration
 st.set_page_config(layout="wide")
@@ -34,9 +31,6 @@ def load_data():
     return df, hallucinations
 
 df, hallucinations = load_data()
-
-# Create a three-column layout
-col1, col2, col3 = st.columns([1, 4, 2])  # col1 for the dropdown, col2 for gauges and ROC curve, col3 for entities list
 
 # Columns to evaluate
 columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
@@ -66,41 +60,38 @@ for col in columns_to_evaluate:
     y_true_encoded = le.transform(y_true)
     y_pred_encoded = le.transform(y_pred)
 
-    # Macro F1 score
+    # Metrics
     macro_f1 = f1_score(y_true_encoded, y_pred_encoded, average='macro')
-
-    # Macro Precision and Recall
     precision = precision_score(y_true_encoded, y_pred_encoded, average='macro')
     recall = recall_score(y_true_encoded, y_pred_encoded, average='macro')
-
-    # AUC
-    # Label binarization is required for multiclass/multilabel AUC calculation
-    classes = le.classes_
-    y_true_binarized = label_binarize(y_true_encoded, classes=range(len(classes)))
-    y_pred_binarized = label_binarize(y_pred_encoded, classes=range(len(classes)))
-
-    # Handle binary and multi-class cases differently for AUC
-    if y_true_binarized.shape[1] == 1:  # binary case
-        auc = roc_auc_score(y_true_encoded, y_pred_encoded)
-        fpr, tpr, _ = roc_curve(y_true_encoded, y_pred_encoded)
-    else:  # multi-class case
-        auc = roc_auc_score(y_true_binarized, y_pred_binarized, average='micro')
-        fpr, tpr, _ = roc_curve(y_true_binarized.ravel(), y_pred_binarized.ravel())
 
     # Store results
     results[col] = {
         'Macro F1 Score': macro_f1,
         'Precision (Macro)': precision,
-        'Recall (Macro)': recall,
-        'AUC': auc,
-        'FPR': fpr,
-        'TPR': tpr
+        'Recall (Macro)': recall
     }
+
+# Dropdown for selecting entity
+selected_entity = st.selectbox("Select Entity", columns_to_evaluate)
+
+# Display metrics for the selected entity
+if selected_entity in results:
+    metrics = results[selected_entity]
+    st.metric(label="F1 Score", value=f"{metrics['Macro F1 Score']:.2f}")
+    st.metric(label="Precision", value=f"{metrics['Precision (Macro)']:.2f}")
+    st.metric(label="Recall", value=f"{metrics['Recall (Macro)']:.2f}")
+
+    # Optionally, display gauges using st.progress for a visual representation
+    st.progress(metrics['Macro F1 Score'], text="F1 Score")
+    st.progress(metrics['Precision (Macro)'], text="Precision")
+    st.progress(metrics['Recall (Macro)'], text="Recall")
 
 # Plot the ROC curves
 plt.figure(figsize=(12, 8))
 for col, metrics in results.items():
-    plt.plot(metrics['FPR'], metrics['TPR'], label=f"{col} (AUC = {metrics['AUC']:.2f})")
+    fpr, tpr, _ = roc_curve(df[f'{col} Checked'], df[col])  # Assuming binary classification for ROC
+    plt.plot(fpr, tpr, label=f"{col} (AUC = {metrics['Macro F1 Score']:.2f})")
 
 plt.plot([0, 1], [0, 1], 'k--', label="Random Guessing (AUC = 0.50)")
 plt.xlabel('False Positive Rate')
@@ -109,7 +100,7 @@ plt.title('ROC Curves')
 plt.legend(loc='lower right')
 plt.grid()
 
-# Instead of plt.show(), use st.pyplot
+# Display the ROC curve
 st.pyplot(plt)
 
 # Create a DataFrame for the table
@@ -117,8 +108,7 @@ table_data = {
     'Column': [],
     'Macro F1 Score': [],
     'Precision (Macro)': [],
-    'Recall (Macro)': [],
-    'AUC': []
+    'Recall (Macro)': []
 }
 
 for col, metrics in results.items():
@@ -126,22 +116,13 @@ for col, metrics in results.items():
     table_data['Macro F1 Score'].append(metrics['Macro F1 Score'])
     table_data['Precision (Macro)'].append(metrics['Precision (Macro)'])
     table_data['Recall (Macro)'].append(metrics['Recall (Macro)'])
-    table_data['AUC'].append(metrics['AUC'])
 
 # Convert to DataFrame for display
 results_df = pd.DataFrame(table_data)
 
 # Display the results table
-st.dataframe(results_df)  # Use st.dataframe instead of print
+st.dataframe(results_df)
 
-# Optionally display the table visually
-fig, ax = plt.subplots(figsize=(10, 6))  # Set the figure size
-ax.axis('off')
-ax.axis('tight')
-ax.table(cellText=results_df.values, colLabels=results_df.columns, cellLoc='center', loc='center')
-
-# Again, use st.pyplot
-st.pyplot(fig)
 
 
 #HEATMAP Display 
