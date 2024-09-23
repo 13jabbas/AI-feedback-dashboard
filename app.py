@@ -1,5 +1,5 @@
 
-#PACKAGES
+# PACKAGES
 
 import streamlit as st
 import numpy as np
@@ -17,8 +17,7 @@ from collections import Counter
 # Set page configuration
 st.set_page_config(layout="wide")
 
-#SIDE BAR LLM VERSION SELECTOR
-
+# SIDE BAR LLM VERSION SELECTOR
 
 # Create a toggle button for showing/hiding the sidebar content
 show_sidebar = st.checkbox("Show LLM Versions", value=False)
@@ -28,10 +27,7 @@ if show_sidebar:
         st.header("")
         # Add a dropdown selector with the specified options
         llm_version = st.selectbox("Select LLM Version", ["LLM V1", "LLM V2", "LLM V3"])
-
         st.write(f"You selected: {llm_version}")
-
-
 
 # Load data
 @st.cache_data
@@ -42,20 +38,8 @@ def load_data():
 
 df, hallucinations = load_data()
 
-
-
-
-
 # Create a three-column layout
 col1, col2, col3 = st.columns([1, 4, 2])  # col1 for the dropdown, col2 for gauges and ROC curve, col3 for entities list
-
-import pandas as pd
-from sklearn.preprocessing import LabelEncoder, label_binarize
-from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, roc_curve
-import matplotlib.pyplot as plt
-import streamlit as st
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
 
 # Function to evaluate metrics
 def evaluate_metrics(df, columns_to_evaluate):
@@ -82,10 +66,11 @@ def evaluate_metrics(df, columns_to_evaluate):
         y_true_binarized = label_binarize(y_true_encoded, classes=range(len(classes)))
         y_pred_binarized = label_binarize(y_pred_encoded, classes=range(len(classes)))
 
-        if y_true_binarized.shape[1] == 1:  # binary case
+        # Handle binary and multi-class AUC calculation
+        if len(classes) == 2:  # Binary case
             auc = roc_auc_score(y_true_encoded, y_pred_encoded)
             fpr, tpr, _ = roc_curve(y_true_encoded, y_pred_encoded)
-        else:  # multi-class case
+        else:  # Multi-class case
             auc = roc_auc_score(y_true_binarized, y_pred_binarized, average='macro', multi_class='ovr')
             fpr, tpr, _ = roc_curve(y_true_binarized.ravel(), y_pred_binarized.ravel())
 
