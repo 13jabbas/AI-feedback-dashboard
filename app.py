@@ -1,13 +1,13 @@
-
 # PACKAGES
 
 import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, roc_curve
+from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.preprocessing import label_binarize, LabelEncoder
 import plotly.graph_objects as go
+import plotly.express as px
 
 # Set page configuration
 st.set_page_config(layout="wide")
@@ -116,6 +116,21 @@ if selected_entity in results:
     # Display the gauge cluster
     st.plotly_chart(fig)
 
+# Create a DataFrame for ranking metrics
+ranked_metrics = pd.DataFrame(results).T
+ranked_metrics['Average'] = ranked_metrics[['Macro F1 Score', 'Precision (Macro)', 'Recall (Macro)']].mean(axis=1)
+ranked_metrics = ranked_metrics.sort_values(by='Average', ascending=False)
+
+# Bar chart for ranking
+bar_fig = px.bar(ranked_metrics, x=ranked_metrics.index, y='Average',
+                  title='Entity Ranking by Average Metrics',
+                  labels={'index': 'Entity', 'Average': 'Average Score'},
+                  color='Average',
+                  color_continuous_scale=px.colors.sequential.Viridis)
+
+# Display the bar chart
+st.plotly_chart(bar_fig)
+
 # Plot the ROC curves for each entity
 for col in columns_to_evaluate:
     if 'Checked' in df.columns:
@@ -172,5 +187,3 @@ results_df = pd.DataFrame(table_data)
 
 # Display the results table
 st.dataframe(results_df)
-
-
