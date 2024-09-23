@@ -60,7 +60,7 @@ for col in columns_to_evaluate:
     y_true_encoded = le.transform(y_true)
     y_pred_encoded = le.transform(y_pred)
 
-    # Metrics
+    # Calculate metrics
     macro_f1 = f1_score(y_true_encoded, y_pred_encoded, average='macro')
     precision = precision_score(y_true_encoded, y_pred_encoded, average='macro')
     recall = recall_score(y_true_encoded, y_pred_encoded, average='macro')
@@ -87,21 +87,42 @@ if selected_entity in results:
     st.progress(metrics['Precision (Macro)'], text="Precision")
     st.progress(metrics['Recall (Macro)'], text="Recall")
 
-# Plot the ROC curves
-plt.figure(figsize=(12, 8))
-for col, metrics in results.items():
-    fpr, tpr, _ = roc_curve(df[f'{col} Checked'], df[col])  # Assuming binary classification for ROC
-    plt.plot(fpr, tpr, label=f"{col} (AUC = {metrics['Macro F1 Score']:.2f})")
+# Plot the ROC curves for each entity
+for col in columns_to_evaluate:
+    if 'Checked' in df.columns:
+        y_true = df[f'{col} Checked'].dropna()
+        y_pred = df[col].dropna()
 
-plt.plot([0, 1], [0, 1], 'k--', label="Random Guessing (AUC = 0.50)")
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('ROC Curves')
-plt.legend(loc='lower right')
-plt.grid()
+        common_indices = y_true.index.intersection(y_pred.index)
+        y_true = y_true.loc[common_indices]
+        y_pred = y_pred.loc[common_indices]
 
-# Display the ROC curve
-st.pyplot(plt)
+        # Binarize the output
+        y_true_binarized = label_binarize(y_true, classes=le.classes_)
+        y_pred_binarized = label_binarize(y_pred, classes=le.classes_)
+
+        # Compute ROC AUC for each class
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+        for i in range(len(le.classes_)):
+            fpr[i], tpr[i], _ = roc_curve(y_true_binarized[:, i], y_pred_binarized[:, i])
+            roc_auc[i] = roc_auc_score(y_true_binarized[:, i], y_pred_binarized[:, i])
+
+        # Plotting the ROC curves
+        plt.figure(figsize=(12, 8))
+        for i in range(len(le.classes_)):
+            plt.plot(fpr[i], tpr[i], label=f"Class {le.classes_[i]} (AUC = {roc_auc[i]:.2f})")
+
+        plt.plot([0, 1], [0, 1], 'k--', label="Random Guessing (AUC = 0.50)")
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title(f'ROC Curves for {col}')
+        plt.legend(loc='lower right')
+        plt.grid()
+
+        # Display the ROC curve
+        st.pyplot(plt)
 
 # Create a DataFrame for the table
 table_data = {
