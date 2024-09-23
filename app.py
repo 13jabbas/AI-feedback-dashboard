@@ -52,11 +52,12 @@ col1, col2, col3 = st.columns([1, 4, 2])  # col1 for the dropdown, col2 for gaug
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, label_binarize
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, roc_curve
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import matplotlib.pyplot as plt
 import streamlit as st
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
-# Macro F1 score, precision, recall, and ROC evaluation for each attribute
+# Function to evaluate metrics
 def evaluate_metrics(df, columns_to_evaluate):
     results = {}
     for col in columns_to_evaluate:
@@ -65,7 +66,7 @@ def evaluate_metrics(df, columns_to_evaluate):
         common_indices = y_true.index.intersection(y_pred.index)
         y_true = y_true.loc[common_indices]
         y_pred = y_pred.loc[common_indices]
-        
+
         le = LabelEncoder()
         combined_labels = pd.concat([y_true, y_pred])
         le.fit(combined_labels)
@@ -81,11 +82,11 @@ def evaluate_metrics(df, columns_to_evaluate):
         y_true_binarized = label_binarize(y_true_encoded, classes=range(len(classes)))
         y_pred_binarized = label_binarize(y_pred_encoded, classes=range(len(classes)))
 
-        if y_true_binarized.shape[1] == 1:
+        if y_true_binarized.shape[1] == 1:  # binary case
             auc = roc_auc_score(y_true_encoded, y_pred_encoded)
             fpr, tpr, _ = roc_curve(y_true_encoded, y_pred_encoded)
-        else:
-            auc = roc_auc_score(y_true_binarized, y_pred_binarized, average='macro')
+        else:  # multi-class case
+            auc = roc_auc_score(y_true_binarized, y_pred_binarized, average='macro', multi_class='ovr')
             fpr, tpr, _ = roc_curve(y_true_binarized.ravel(), y_pred_binarized.ravel())
 
         results[col] = {
@@ -162,6 +163,7 @@ with col3:
 
 # Add another section for hallucinations
 st.header("Hallucinations Analysis")
+
 
 #HEATMAP Display 
 
