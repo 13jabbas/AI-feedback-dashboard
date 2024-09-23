@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, roc_curve
 from sklearn.preprocessing import label_binarize, LabelEncoder
+import plotly.graph_objects as go
 
 # Set page configuration
 st.set_page_config(layout="wide")
@@ -78,14 +79,42 @@ selected_entity = st.selectbox("Select Entity", columns_to_evaluate)
 # Display metrics for the selected entity
 if selected_entity in results:
     metrics = results[selected_entity]
-    st.metric(label="F1 Score", value=f"{metrics['Macro F1 Score']:.2f}")
-    st.metric(label="Precision", value=f"{metrics['Precision (Macro)']:.2f}")
-    st.metric(label="Recall", value=f"{metrics['Recall (Macro)']:.2f}")
 
-    # Optionally, display gauges using st.progress for a visual representation
-    st.progress(metrics['Macro F1 Score'], text="F1 Score")
-    st.progress(metrics['Precision (Macro)'], text="Precision")
-    st.progress(metrics['Recall (Macro)'], text="Recall")
+    # Create gauge cluster
+    fig = go.Figure()
+
+    # F1 Score Gauge
+    fig.add_trace(go.Indicator(
+        mode="gauge+number",
+        value=metrics['Macro F1 Score'],
+        title={'text': "F1 Score"},
+        gauge={'axis': {'range': [0, 1]}},
+        domain={'x': [0, 0.33], 'y': [0, 1]}
+    ))
+
+    # Precision Gauge
+    fig.add_trace(go.Indicator(
+        mode="gauge+number",
+        value=metrics['Precision (Macro)'],
+        title={'text': "Precision"},
+        gauge={'axis': {'range': [0, 1]}},
+        domain={'x': [0.34, 0.67], 'y': [0, 1]}
+    ))
+
+    # Recall Gauge
+    fig.add_trace(go.Indicator(
+        mode="gauge+number",
+        value=metrics['Recall (Macro)'],
+        title={'text': "Recall"},
+        gauge={'axis': {'range': [0, 1]}},
+        domain={'x': [0.68, 1], 'y': [0, 1]}
+    ))
+
+    # Update layout
+    fig.update_layout(title_text=f"Metrics for {selected_entity}", height=300)
+
+    # Display the gauge cluster
+    st.plotly_chart(fig)
 
 # Plot the ROC curves for each entity
 for col in columns_to_evaluate:
@@ -143,7 +172,6 @@ results_df = pd.DataFrame(table_data)
 
 # Display the results table
 st.dataframe(results_df)
-
 
 
 #HEATMAP Display 
