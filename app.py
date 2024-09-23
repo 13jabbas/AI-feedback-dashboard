@@ -1,3 +1,6 @@
+
+#PACKAGES
+
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -46,7 +49,14 @@ df, hallucinations = load_data()
 # Create a three-column layout
 col1, col2, col3 = st.columns([1, 4, 2])  # col1 for the dropdown, col2 for gauges and ROC curve, col3 for entities list
 
-# Micro F1 score, precision, recall, and ROC evaluation for each attribute
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder, label_binarize
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, roc_curve
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import streamlit as st
+
+# Macro F1 score, precision, recall, and ROC evaluation for each attribute
 def evaluate_metrics(df, columns_to_evaluate):
     results = {}
     for col in columns_to_evaluate:
@@ -62,9 +72,11 @@ def evaluate_metrics(df, columns_to_evaluate):
         y_true_encoded = le.transform(y_true)
         y_pred_encoded = le.transform(y_pred)
 
-        micro_f1 = f1_score(y_true_encoded, y_pred_encoded, average='micro')
-        precision = precision_score(y_true_encoded, y_pred_encoded, average='micro')
-        recall = recall_score(y_true_encoded, y_pred_encoded, average='micro')
+        # Use macro averaging
+        macro_f1 = f1_score(y_true_encoded, y_pred_encoded, average='macro')
+        precision = precision_score(y_true_encoded, y_pred_encoded, average='macro')
+        recall = recall_score(y_true_encoded, y_pred_encoded, average='macro')
+        
         classes = le.classes_
         y_true_binarized = label_binarize(y_true_encoded, classes=range(len(classes)))
         y_pred_binarized = label_binarize(y_pred_encoded, classes=range(len(classes)))
@@ -73,10 +85,17 @@ def evaluate_metrics(df, columns_to_evaluate):
             auc = roc_auc_score(y_true_encoded, y_pred_encoded)
             fpr, tpr, _ = roc_curve(y_true_encoded, y_pred_encoded)
         else:
-            auc = roc_auc_score(y_true_binarized, y_pred_binarized, average='micro')
+            auc = roc_auc_score(y_true_binarized, y_pred_binarized, average='macro')
             fpr, tpr, _ = roc_curve(y_true_binarized.ravel(), y_pred_binarized.ravel())
 
-        results[col] = {'Micro F1 Score': micro_f1, 'Precision': precision, 'Recall': recall, 'AUC': auc, 'FPR': fpr, 'TPR': tpr}
+        results[col] = {
+            'Macro F1 Score': macro_f1,
+            'Precision': precision,
+            'Recall': recall,
+            'AUC': auc,
+            'FPR': fpr,
+            'TPR': tpr
+        }
     
     return results
 
@@ -86,7 +105,6 @@ results = evaluate_metrics(df, columns_to_evaluate)
 
 # Sidebar for dropdown selection
 with col1:
-
     selected_entity = st.selectbox("Choose an entity", columns_to_evaluate)
 
 # Display the metrics for the selected entity as gauges
@@ -95,12 +113,12 @@ with col2:
     metrics = results[selected_entity]
 
     # Create gauges for each metric using Plotly
-    fig_gauges = make_subplots(rows=1, cols=4, subplot_titles=["Micro F1 Score", "Precision", "Recall"], specs=[[{'type': 'indicator'}] * 4])
+    fig_gauges = make_subplots(rows=1, cols=4, subplot_titles=["Macro F1 Score", "Precision", "Recall"], specs=[[{'type': 'indicator'}] * 4])
 
     fig_gauges.add_trace(go.Indicator(
         mode="gauge+number",
-        value=metrics['Micro F1 Score'] * 100,
-        title={'text': "Micro F1 Score"},
+        value=metrics['Macro F1 Score'] * 100,
+        title={'text': "Macro F1 Score"},
         gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "darkblue"}}
     ), row=1, col=1)
 
@@ -118,12 +136,8 @@ with col2:
         gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "orange"}}
     ), row=1, col=3)
 
-
-
     fig_gauges.update_layout(height=400, width=1200, title_text=f"{selected_entity}")
     st.plotly_chart(fig_gauges)
-
-   
 
 # Add a section for displaying entities ordered by accuracy in the third column
 with col3:
@@ -148,8 +162,6 @@ with col3:
 
 # Add another section for hallucinations
 st.header("Hallucinations Analysis")
-
-
 
 #HEATMAP Display 
 
