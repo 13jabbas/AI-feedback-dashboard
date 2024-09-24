@@ -162,3 +162,24 @@ for col in columns_to_evaluate:
         # Display the ROC curve
         st.pyplot(plt)
 
+import pandas as pd
+import streamlit as st
+
+# Read the CSV file
+df = pd.read_csv('Hallucination Confidence Score (3).csv')
+
+# Convert 'Hallucination Confidence Score' from string percentage to float
+df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
+
+# Function to display the content
+def display_reviews(df):
+    for i, row in df.iterrows():
+        st.subheader(f"Review {i + 1}")
+        st.write(f"**Review:** {row['Review Text Original']}")
+        st.write(f"**Annotation:** {row['Annotated Text']}")
+        st.write(f"**Description:** {row['Description Original']}")
+        st.write(f"**Hallucination Confidence Score:** {row['Hallucination Confidence Score'] * 100:.2f}%")
+        st.markdown("---")
+
+# Display all reviews in the dataframe
+display_reviews(df)
