@@ -162,22 +162,3 @@ for col in columns_to_evaluate:
         # Display the ROC curve
         st.pyplot(plt)
 
-# Create a DataFrame for the table
-table_data = {
-    'Column': [],
-    'Macro F1 Score': [],
-    'Precision (Macro)': [],
-    'Recall (Macro)': []
-}
-
-for col, metrics in results.items():
-    table_data['Column'].append(col)
-    table_data['Macro F1 Score'].append(metrics['Macro F1 Score'])
-    table_data['Precision (Macro)'].append(metrics['Precision (Macro)'])
-    table_data['Recall (Macro)'].append(metrics['Recall (Macro)'])
-
-# Convert to DataFrame for display
-results_df = pd.DataFrame(table_data)
-
-# Display the results table
-st.dataframe(results_df)
