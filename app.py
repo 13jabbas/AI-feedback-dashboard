@@ -162,6 +162,8 @@ for col in columns_to_evaluate:
         # Display the ROC curve
         st.pyplot(plt)
 
+##HALLUCINATION CONFIDENCE SCORES 
+
 import pandas as pd
 import streamlit as st
 
@@ -171,7 +173,20 @@ df = pd.read_csv('Hallucination Confidence Score (3).csv')
 # Convert 'Hallucination Confidence Score' from string percentage to float
 df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
 
-# Function to display the content
+# Set the page size to 5 reviews per page
+page_size = 5
+
+# Initialize session state for pagination (if it doesn't exist)
+if 'page_number' not in st.session_state:
+    st.session_state['page_number'] = 0
+
+# Function to get the current page of reviews
+def get_paginated_data(df, page_number, page_size):
+    start_idx = page_number * page_size
+    end_idx = start_idx + page_size
+    return df.iloc[start_idx:end_idx]
+
+# Function to display reviews
 def display_reviews(df):
     for i, row in df.iterrows():
         st.subheader(f"Review {i + 1}")
@@ -181,5 +196,21 @@ def display_reviews(df):
         st.write(f"**Hallucination Confidence Score:** {row['Hallucination Confidence Score'] * 100:.2f}%")
         st.markdown("---")
 
-# Display all reviews in the dataframe
-display_reviews(df)
+# Get the current page's data
+paginated_df = get_paginated_data(df, st.session_state['page_number'], page_size)
+
+# Display the current page of reviews
+display_reviews(paginated_df)
+
+# Add "Next" and "Previous" buttons for pagination
+col1, col2, col3 = st.columns([1, 1, 1])
+
+# Only show the "Previous" button if we're beyond the first page
+if st.session_state['page_number'] > 0:
+    if col1.button("Previous"):
+        st.session_state['page_number'] -= 1
+
+# Only show the "Next" button if there are more reviews to display
+if len(df) > (st.session_state['page_number'] + 1) * page_size:
+    if col3.button("Next"):
+        st.session_state['page_number'] += 1
