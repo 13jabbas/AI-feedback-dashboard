@@ -193,7 +193,14 @@ def display_reviews(df):
         st.write(f"**Review:** {row['Review Text Original']}")
         st.write(f"**Annotation:** {row['Annotated Text']}")
         st.write(f"**Description:** {row['Description Original']}")
-        st.write(f"**Hallucination Confidence Score:** {row['Hallucination Confidence Score'] * 100:.2f}%")
+
+        # Highlighted and right-aligned Hallucination Confidence Score
+        st.markdown(f"""
+            <div style='text-align: right; font-size: 20px; color: red; font-weight: bold;'>
+                Hallucination Confidence Score: {row['Hallucination Confidence Score'] * 100:.2f}%
+            </div>
+        """, unsafe_allow_html=True)
+        
         st.markdown("---")
 
 # Get the current page's data
