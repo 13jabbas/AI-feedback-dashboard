@@ -173,6 +173,23 @@ df = pd.read_csv('Hallucination Confidence Score (3).csv')
 # Convert 'Hallucination Confidence Score' from string percentage to float
 df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
 
+# Dropdown for selecting score range
+range_options = {
+    'All': (0.0, 1.0),
+    '0% - 20%': (0.0, 0.20),
+    '20% - 40%': (0.20, 0.40),
+    '40% - 60%': (0.40, 0.60),
+    '60% - 80%': (0.60, 0.80),
+    '80% - 100%': (0.80, 1.0)
+}
+
+# Display the dropdown in the sidebar
+selected_range = st.selectbox('Select Hallucination Confidence Score Range:', list(range_options.keys()))
+
+# Filter the dataframe based on the selected range
+min_score, max_score = range_options[selected_range]
+filtered_df = df[(df['Hallucination Confidence Score'] >= min_score) & (df['Hallucination Confidence Score'] <= max_score)]
+
 # Set the page size to 5 reviews per page
 page_size = 5
 
@@ -203,8 +220,8 @@ def display_reviews(df):
         
         st.markdown("---")
 
-# Get the current page's data
-paginated_df = get_paginated_data(df, st.session_state['page_number'], page_size)
+# Get the current page's data based on the filtered dataframe
+paginated_df = get_paginated_data(filtered_df, st.session_state['page_number'], page_size)
 
 # Display the current page of reviews
 display_reviews(paginated_df)
@@ -218,6 +235,6 @@ if st.session_state['page_number'] > 0:
         st.session_state['page_number'] -= 1
 
 # Only show the "Next" button if there are more reviews to display
-if len(df) > (st.session_state['page_number'] + 1) * page_size:
+if len(filtered_df) > (st.session_state['page_number'] + 1) * page_size:
     if col3.button("Next"):
         st.session_state['page_number'] += 1
