@@ -26,14 +26,14 @@ if show_sidebar:
 # Load data
 @st.cache_data
 def load_data():
-    df = pd.read_csv('LLMNER.csv')  # Modify path as needed
+    df = pd.read_csv('LLMNER (1).csv')  # Modify path as needed
     hallucinations = pd.read_csv('Hallucination Confidence Score (3).csv')  # Modify path as needed
     return df, hallucinations
 
 df, hallucinations = load_data()
 
 # Columns to evaluate
-columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment']
+columns_to_evaluate = ['Action', 'Object', 'Feature', 'Ability', 'Agent', 'Environment', 'Valence']
 
 # Dictionary to store the results
 results = {}
