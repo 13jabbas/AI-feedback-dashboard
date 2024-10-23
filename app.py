@@ -247,11 +247,23 @@ if len(filtered_df) > (st.session_state['page_number'] + 1) * page_size:
 
 ##ROC CURVE
 
-import streamlit as st
+
+  import streamlit as st
+import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, roc_auc_score
 
-# Define your ground truth and predicted scores
+# Load the CSV file
+file_path = 'hallucinationThreshold (3).csv'
+df = pd.read_csv(file_path)
+
+# Convert 'Hallucination Confidence Score' to numeric if needed
+df['Hallucination Confidence Score'] = pd.to_numeric(df['Hallucination Confidence Score'], errors='coerce')
+
+# Drop rows where the 'Hallucination Confidence Score' is NaN (if any)
+df = df.dropna(subset=['Hallucination Confidence Score'])
+
+# Define ground truth and predicted scores
 y_true = df['hallucination_groundtruth']  # Ground truth (1 for hallucination, 0 for non-hallucination)
 y_scores = df['Hallucination Confidence Score']  # Predicted probabilities or confidence scores
 
@@ -274,6 +286,11 @@ def plot_roc_curve(fpr, tpr, roc_auc):
 # Display the section in Streamlit
 st.title("Hallucination Detection Evaluation")
 st.subheader("ROC Curve")
+
+# Plot and display the ROC curve in Streamlit
+roc_plot = plot_roc_curve(fpr, tpr, roc_auc)
+st.pyplot(roc_plot)
+
 
 # Plot and display the ROC curve in Streamlit
 roc_plot = plot_roc_curve(fpr, tpr, roc_auc)
