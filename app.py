@@ -291,8 +291,3 @@ st.subheader("ROC Curve")
 roc_plot = plot_roc_curve(fpr, tpr, roc_auc)
 st.pyplot(roc_plot)
 
-
-# Plot and display the ROC curve in Streamlit
-roc_plot = plot_roc_curve(fpr, tpr, roc_auc)
-st.pyplot(roc_plot)
-
