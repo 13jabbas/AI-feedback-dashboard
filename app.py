@@ -248,7 +248,7 @@ if len(filtered_df) > (st.session_state['page_number'] + 1) * page_size:
 ##ROC CURVE
 
 
-  import streamlit as st
+import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, roc_auc_score
