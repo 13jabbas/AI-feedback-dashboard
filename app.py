@@ -242,3 +242,40 @@ if st.session_state['page_number'] > 0:
 if len(filtered_df) > (st.session_state['page_number'] + 1) * page_size:
     if col3.button("Next"):
         st.session_state['page_number'] += 1
+
+
+
+##ROC CURVE
+
+import streamlit as st
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, roc_auc_score
+
+# Define your ground truth and predicted scores
+y_true = df['hallucination_groundtruth']  # Ground truth (1 for hallucination, 0 for non-hallucination)
+y_scores = df['Hallucination Confidence Score']  # Predicted probabilities or confidence scores
+
+# Calculate FPR, TPR, and AUC
+fpr, tpr, thresholds = roc_curve(y_true, y_scores)
+roc_auc = roc_auc_score(y_true, y_scores)
+
+# Create the ROC plot
+def plot_roc_curve(fpr, tpr, roc_auc):
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='blue')
+    plt.plot([0, 1], [0, 1], linestyle='--', color='gray')  # Diagonal line for random predictions
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve for Hallucination Detection')
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    return plt
+
+# Display the section in Streamlit
+st.title("Hallucination Detection Evaluation")
+st.subheader("ROC Curve")
+
+# Plot and display the ROC curve in Streamlit
+roc_plot = plot_roc_curve(fpr, tpr, roc_auc)
+st.pyplot(roc_plot)
+
