@@ -251,7 +251,8 @@ if len(filtered_df) > (st.session_state['page_number'] + 1) * page_size:
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_curve, roc_auc_score
+import numpy as np
+from sklearn.metrics import roc_curve, roc_auc_score, f1_score
 
 # Load the CSV file
 file_path = 'hallucinationThreshold (3).csv'
@@ -267,15 +268,39 @@ df = df.dropna(subset=['Hallucination Confidence Score'])
 y_true = df['hallucination_groundtruth']  # Ground truth (1 for hallucination, 0 for non-hallucination)
 y_scores = df['Hallucination Confidence Score']  # Predicted probabilities or confidence scores
 
-# Calculate FPR, TPR, and AUC
+# Calculate FPR, TPR, and thresholds for ROC curve
 fpr, tpr, thresholds = roc_curve(y_true, y_scores)
 roc_auc = roc_auc_score(y_true, y_scores)
 
-# Create the ROC plot
-def plot_roc_curve(fpr, tpr, roc_auc):
+# Calculate F1 score for each threshold
+f1_scores = []
+for threshold in thresholds:
+    y_pred = (y_scores >= threshold).astype(int)  # Convert probabilities to binary predictions
+    f1 = f1_score(y_true, y_pred)
+    f1_scores.append(f1)
+
+# Convert to numpy arrays for easier sorting
+f1_scores = np.array(f1_scores)
+thresholds = np.array(thresholds)
+
+# Sort thresholds based on F1 scores in descending order
+sorted_indices = np.argsort(f1_scores)[::-1]
+sorted_thresholds = thresholds[sorted_indices]
+sorted_f1_scores = f1_scores[sorted_indices]
+
+# Get the top 10 optimal thresholds and their corresponding F1 scores
+top_10_thresholds = sorted_thresholds[:10]
+top_10_f1_scores = sorted_f1_scores[:10]
+
+# Create the ROC plot for a selected threshold
+def plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, tpr_chosen):
     plt.figure(figsize=(8, 6))
     plt.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='blue')
     plt.plot([0, 1], [0, 1], linestyle='--', color='gray')  # Diagonal line for random predictions
+    
+    # Mark the chosen threshold point on the ROC curve
+    plt.scatter(fpr_chosen, tpr_chosen, label=f'Threshold {chosen_threshold:.2f} (F1 = {chosen_f1:.2f})', color='red')
+
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.title('ROC Curve for Hallucination Detection')
@@ -285,9 +310,21 @@ def plot_roc_curve(fpr, tpr, roc_auc):
 
 # Display the section in Streamlit
 st.title("Hallucination Detection Evaluation")
-st.subheader("ROC Curve")
+st.subheader("ROC Curve with Threshold Selection")
 
-# Plot and display the ROC curve in Streamlit
-roc_plot = plot_roc_curve(fpr, tpr, roc_auc)
+# Create a dropdown menu to select a threshold
+threshold_option = st.selectbox(
+    "Select a Threshold",
+    [f'{top_10_thresholds[i]:.4f} (F1 = {top_10_f1_scores[i]:.4f})' for i in range(10)]
+)
+
+# Get the selected threshold and corresponding FPR/TPR values
+selected_index = [i for i in range(10) if f'{top_10_thresholds[i]:.4f}' in threshold_option][0]
+chosen_threshold = top_10_thresholds[selected_index]
+chosen_f1 = top_10_f1_scores[selected_index]
+fpr_chosen = fpr[sorted_indices[selected_index]]
+tpr_chosen = tpr[sorted_indices[selected_index]]
+
+# Plot and display the ROC curve with the selected threshold
+roc_plot = plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, tpr_chosen)
 st.pyplot(roc_plot)
-
