@@ -245,9 +245,6 @@ if len(filtered_df) > (st.session_state['page_number'] + 1) * page_size:
 
 
 
-##ROC CURVE
-
-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -272,32 +269,44 @@ y_scores = df['Hallucination Confidence Score']  # Predicted probabilities or co
 fpr, tpr, thresholds = roc_curve(y_true, y_scores)
 roc_auc = roc_auc_score(y_true, y_scores)
 
-# Calculate F1 score for each threshold
-f1_scores = []
-for threshold in thresholds:
-    y_pred = (y_scores >= threshold).astype(int)  # Convert probabilities to binary predictions
-    f1 = f1_score(y_true, y_pred)
-    f1_scores.append(f1)
+# Define fixed thresholds at 5% increments
+fixed_thresholds = np.arange(0.0, 1.05, 0.05)  # 0% to 100% in 5% steps
 
-# Convert to numpy arrays for easier sorting
-f1_scores = np.array(f1_scores)
-thresholds = np.array(thresholds)
+# Calculate F1 scores for each fixed threshold
+f1_scores_fixed = []
+fpr_fixed = []
+tpr_fixed = []
 
-# Sort thresholds based on F1 scores in descending order
-sorted_indices = np.argsort(f1_scores)[::-1]
-sorted_thresholds = thresholds[sorted_indices]
-sorted_f1_scores = f1_scores[sorted_indices]
+for threshold in fixed_thresholds:
+    y_pred = (y_scores >= threshold).astype(int)
+    f1_scores_fixed.append(f1_score(y_true, y_pred))
 
-# Get the top 10 optimal thresholds and their corresponding F1 scores
-top_10_thresholds = sorted_thresholds[:10]
-top_10_f1_scores = sorted_f1_scores[:10]
+    # Find nearest FPR and TPR values for the current threshold
+    nearest_index = np.argmin(np.abs(thresholds - threshold))
+    fpr_fixed.append(fpr[nearest_index])
+    tpr_fixed.append(tpr[nearest_index])
 
-# Create the ROC plot for a selected threshold
+# Dropdown menu to select a threshold
+threshold_option = st.selectbox(
+    "Select a Threshold",
+    [f'{int(thresh * 100)}%' for thresh in fixed_thresholds]
+)
+
+# Get selected threshold index
+selected_index = [i for i, thresh in enumerate(fixed_thresholds) if f'{int(thresh * 100)}%' == threshold_option][0]
+
+# Get values for the selected threshold
+chosen_threshold = fixed_thresholds[selected_index]
+chosen_f1 = f1_scores_fixed[selected_index]
+fpr_chosen = fpr_fixed[selected_index]
+tpr_chosen = tpr_fixed[selected_index]
+
+# Plot and display the ROC curve with the selected threshold
 def plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, tpr_chosen):
     plt.figure(figsize=(8, 6))
     plt.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='blue')
     plt.plot([0, 1], [0, 1], linestyle='--', color='gray')  # Diagonal line for random predictions
-    
+
     # Mark the chosen threshold point on the ROC curve
     plt.scatter(fpr_chosen, tpr_chosen, label=f'Threshold {chosen_threshold:.2f} (F1 = {chosen_f1:.2f})', color='red')
 
@@ -308,32 +317,6 @@ def plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, t
     plt.grid(True)
     return plt
 
-# Display the section in Streamlit
-st.title("Hallucination Detection Evaluation")
-st.subheader("ROC Curve with Threshold Selection")
-
-# Define the threshold ranges as percentages
-threshold_ranges = [(i, i + 5) for i in range(0, 100, 5)]
-threshold_options = [f'{start}-{end}%' for start, end in threshold_ranges]
-
-# Dropdown menu to select a threshold range
-threshold_option = st.selectbox("Select a Threshold Range", threshold_options)
-
-# Get the indices of thresholds within the selected range
-selected_range_index = threshold_options.index(threshold_option)
-range_start, range_end = threshold_ranges[selected_range_index]
-selected_indices = [i for i, threshold in enumerate(top_10_thresholds * 100) if range_start <= threshold < range_end]
-
-# Ensure there are available thresholds within the selected range
-if selected_indices:
-    chosen_index = selected_indices[0]  # Select the first index in the range
-    chosen_threshold = top_10_thresholds[chosen_index]
-    chosen_f1 = top_10_f1_scores[chosen_index]
-    fpr_chosen = fpr[sorted_indices[chosen_index]]
-    tpr_chosen = tpr[sorted_indices[chosen_index]]
-    
-    # Plot and display the ROC curve with the selected threshold
-    roc_plot = plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, tpr_chosen)
-    st.pyplot(roc_plot)
-else:
-    st.write("No thresholds available within the selected range.")
+# Display the ROC curve plot
+roc_plot = plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, tpr_chosen)
+st.pyplot(roc_plot)
