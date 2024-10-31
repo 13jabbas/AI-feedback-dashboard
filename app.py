@@ -312,19 +312,28 @@ def plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, t
 st.title("Hallucination Detection Evaluation")
 st.subheader("ROC Curve with Threshold Selection")
 
-# Create a dropdown menu to select a threshold
-threshold_option = st.selectbox(
-    "Select a Threshold",
-    [f'{top_10_thresholds[i]:.4f} (F1 = {top_10_f1_scores[i]:.4f})' for i in range(10)]
-)
+# Define the threshold ranges as percentages
+threshold_ranges = [(i, i + 5) for i in range(0, 100, 5)]
+threshold_options = [f'{start}-{end}%' for start, end in threshold_ranges]
 
-# Get the selected threshold and corresponding FPR/TPR values
-selected_index = [i for i in range(10) if f'{top_10_thresholds[i]:.4f}' in threshold_option][0]
-chosen_threshold = top_10_thresholds[selected_index]
-chosen_f1 = top_10_f1_scores[selected_index]
-fpr_chosen = fpr[sorted_indices[selected_index]]
-tpr_chosen = tpr[sorted_indices[selected_index]]
+# Dropdown menu to select a threshold range
+threshold_option = st.selectbox("Select a Threshold Range", threshold_options)
 
-# Plot and display the ROC curve with the selected threshold
-roc_plot = plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, tpr_chosen)
-st.pyplot(roc_plot)
+# Get the indices of thresholds within the selected range
+selected_range_index = threshold_options.index(threshold_option)
+range_start, range_end = threshold_ranges[selected_range_index]
+selected_indices = [i for i, threshold in enumerate(top_10_thresholds * 100) if range_start <= threshold < range_end]
+
+# Ensure there are available thresholds within the selected range
+if selected_indices:
+    chosen_index = selected_indices[0]  # Select the first index in the range
+    chosen_threshold = top_10_thresholds[chosen_index]
+    chosen_f1 = top_10_f1_scores[chosen_index]
+    fpr_chosen = fpr[sorted_indices[chosen_index]]
+    tpr_chosen = tpr[sorted_indices[chosen_index]]
+    
+    # Plot and display the ROC curve with the selected threshold
+    roc_plot = plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, tpr_chosen)
+    st.pyplot(roc_plot)
+else:
+    st.write("No thresholds available within the selected range.")
