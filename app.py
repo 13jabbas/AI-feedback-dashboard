@@ -164,9 +164,11 @@ for col in columns_to_evaluate:
 
 ##HALLUCINATION CONFIDENCE SCORES 
 
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import roc_curve, roc_auc_score, f1_score
+import streamlit as st
 
 # Load the CSV data
 df = pd.read_csv('/content/drive/MyDrive/Capstone/StreamlitRoc.csv')
@@ -196,6 +198,7 @@ optimal_indices = [i for i, f1 in enumerate(f1_scores) if f1 == max_f1]
 optimal_thresholds = thresholds[optimal_indices]
 
 # Plot ROC curve
+plt.figure(figsize=(10, 6))
 plt.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='b')
 
 # Mark the points of the optimal thresholds on the ROC curve
@@ -206,14 +209,11 @@ for idx in optimal_indices:
 plt.xlabel('False Positive Rate (FPR)')
 plt.ylabel('True Positive Rate (TPR)')
 plt.title('ROC Curve (TPR vs FPR)')
-
-# Add legend
 plt.legend()
 
-# Show the plot
-plt.show()
+# Display the plot in Streamlit
+st.pyplot(plt)
 
-# Print the optimal thresholds and maximum F1 score
-print(f'Optimal Thresholds: {optimal_thresholds}')
-print(f'Maximum F1 Score: {max_f1:.4f}')
-
+# Display the optimal thresholds and maximum F1 score in Streamlit
+st.write(f'Optimal Thresholds: {optimal_thresholds}')
+st.write(f'Maximum F1 Score: {max_f1:.4f}')
