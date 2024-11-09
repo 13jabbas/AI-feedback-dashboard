@@ -164,159 +164,56 @@ for col in columns_to_evaluate:
 
 ##HALLUCINATION CONFIDENCE SCORES 
 
-import pandas as pd
-import streamlit as st
-
-# Read the CSV file
-df = pd.read_csv('Hallucination Confidence Score (3).csv')
-
-# Convert 'Hallucination Confidence Score' from string percentage to float
-df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
-
-# Dropdown for selecting score range
-range_options = {
-    '0%': (0.0, 0.0),
-    '10% - 20%': (0.10, 0.20),
-    '20% - 30%': (0.20, 0.30),
-    '30% - 40%': (0.30, 0.40),
-    '40% - 50%': (0.40, 0.50),
-    '50% - 60%': (0.50, 0.60),
-    '60% - 70%': (0.60, 0.70),
-    '70% - 80%': (0.70, 0.80),
-    '80% - 90%': (0.80, 0.90),
-    '90% - 100%': (0.90, 1.0)
-}
-
-# Display the dropdown in the sidebar
-selected_range = st.selectbox('Select Hallucination Confidence Score Range:', list(range_options.keys()))
-
-# Filter the dataframe based on the selected range
-min_score, max_score = range_options[selected_range]
-filtered_df = df[(df['Hallucination Confidence Score'] >= min_score) & (df['Hallucination Confidence Score'] <= max_score)]
-
-# Set the page size to 5 reviews per page
-page_size = 5
-
-# Initialize session state for pagination (if it doesn't exist)
-if 'page_number' not in st.session_state:
-    st.session_state['page_number'] = 0
-
-# Function to get the current page of reviews
-def get_paginated_data(df, page_number, page_size):
-    start_idx = page_number * page_size
-    end_idx = start_idx + page_size
-    return df.iloc[start_idx:end_idx]
-
-# Function to display reviews
-def display_reviews(df):
-    for i, row in df.iterrows():
-        st.subheader(f"Review {i + 1}")
-        st.write(f"**Review:** {row['Review Text Original']}")
-        st.write(f"**Annotation:** {row['Annotated Text']}")
-        st.write(f"**Description:** {row['Description Original']}")
-
-        # Highlighted and right-aligned Hallucination Confidence Score
-        st.markdown(f"""
-            <div style='text-align: right; font-size: 20px; color: red; font-weight: bold;'>
-                Hallucination Confidence Score: {row['Hallucination Confidence Score'] * 100:.2f}%
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("---")
-
-# Get the current page's data based on the filtered dataframe
-paginated_df = get_paginated_data(filtered_df, st.session_state['page_number'], page_size)
-
-# Display the current page of reviews
-display_reviews(paginated_df)
-
-# Add "Next" and "Previous" buttons for pagination
-col1, col2, col3 = st.columns([1, 1, 1])
-
-# Only show the "Previous" button if we're beyond the first page
-if st.session_state['page_number'] > 0:
-    if col1.button("Previous"):
-        st.session_state['page_number'] -= 1
-
-# Only show the "Next" button if there are more reviews to display
-if len(filtered_df) > (st.session_state['page_number'] + 1) * page_size:
-    if col3.button("Next"):
-        st.session_state['page_number'] += 1
-
-
-
-import streamlit as st
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import roc_curve, roc_auc_score, f1_score
 
-# Load the CSV file
-file_path = 'hallucinationThreshold (3).csv'
-df = pd.read_csv(file_path)
+# Load the CSV data
+df = pd.read_csv('/content/drive/MyDrive/Capstone/StreamlitRoc.csv')
 
-# Convert 'Hallucination Confidence Score' to numeric if needed
-df['Hallucination Confidence Score'] = pd.to_numeric(df['Hallucination Confidence Score'], errors='coerce')
-
-# Drop rows where the 'Hallucination Confidence Score' is NaN (if any)
-df = df.dropna(subset=['Hallucination Confidence Score'])
-
-# Define ground truth and predicted scores
+# Define ground truth and predicted probabilities
 y_true = df['hallucination_groundtruth']  # Ground truth (1 for hallucination, 0 for non-hallucination)
-y_scores = df['Hallucination Confidence Score']  # Predicted probabilities or confidence scores
+y_scores = df['Hallucination Confidence Score']  # Predicted probabilities or scores
 
-# Calculate FPR, TPR, and thresholds for ROC curve
+# Compute False Positive Rate (FPR), True Positive Rate (TPR), and thresholds
 fpr, tpr, thresholds = roc_curve(y_true, y_scores)
+
+# Calculate the Area Under the Curve (AUC)
 roc_auc = roc_auc_score(y_true, y_scores)
 
-# Define fixed thresholds at 5% increments
-fixed_thresholds = np.arange(0.0, 1.05, 0.05)  # 0% to 100% in 5% steps
+# Compute F1 score for each threshold
+f1_scores = []
+for threshold in thresholds:
+    y_pred = (y_scores >= threshold).astype(int)  # Convert probabilities to binary predictions
+    f1 = f1_score(y_true, y_pred)
+    f1_scores.append(f1)
 
-# Calculate F1 scores for each fixed threshold
-f1_scores_fixed = []
-fpr_fixed = []
-tpr_fixed = []
+# Find the maximum F1 score
+max_f1 = max(f1_scores)
 
-for threshold in fixed_thresholds:
-    y_pred = (y_scores >= threshold).astype(int)
-    f1_scores_fixed.append(f1_score(y_true, y_pred))
+# Find all thresholds that give the maximum F1 score
+optimal_indices = [i for i, f1 in enumerate(f1_scores) if f1 == max_f1]
+optimal_thresholds = thresholds[optimal_indices]
 
-    # Find nearest FPR and TPR values for the current threshold
-    nearest_index = np.argmin(np.abs(thresholds - threshold))
-    fpr_fixed.append(fpr[nearest_index])
-    tpr_fixed.append(tpr[nearest_index])
+# Plot ROC curve
+plt.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='b')
 
-# Dropdown menu to select a threshold
-threshold_option = st.selectbox(
-    "Select a Threshold",
-    [f'{int(thresh * 100)}%' for thresh in fixed_thresholds]
-)
+# Mark the points of the optimal thresholds on the ROC curve
+for idx in optimal_indices:
+    plt.scatter(fpr[idx], tpr[idx], color='red', label=f'Optimal Threshold ({thresholds[idx]:.2f})')
 
-# Get selected threshold index
-selected_index = [i for i, thresh in enumerate(fixed_thresholds) if f'{int(thresh * 100)}%' == threshold_option][0]
+# Add labels and title
+plt.xlabel('False Positive Rate (FPR)')
+plt.ylabel('True Positive Rate (TPR)')
+plt.title('ROC Curve (TPR vs FPR)')
 
-# Get values for the selected threshold
-chosen_threshold = fixed_thresholds[selected_index]
-chosen_f1 = f1_scores_fixed[selected_index]
-fpr_chosen = fpr_fixed[selected_index]
-tpr_chosen = tpr_fixed[selected_index]
+# Add legend
+plt.legend()
 
-# Plot and display the ROC curve with the selected threshold
-def plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, tpr_chosen):
-    plt.figure(figsize=(8, 6))
-    plt.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='blue')
-    plt.plot([0, 1], [0, 1], linestyle='--', color='gray')  # Diagonal line for random predictions
+# Show the plot
+plt.show()
 
-    # Mark the chosen threshold point on the ROC curve
-    plt.scatter(fpr_chosen, tpr_chosen, label=f'Threshold {chosen_threshold:.2f} (F1 = {chosen_f1:.2f})', color='red')
+# Print the optimal thresholds and maximum F1 score
+print(f'Optimal Thresholds: {optimal_thresholds}')
+print(f'Maximum F1 Score: {max_f1:.4f}')
 
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('ROC Curve for Hallucination Detection')
-    plt.legend(loc='lower right')
-    plt.grid(True)
-    return plt
-
-# Display the ROC curve plot
-roc_plot = plot_roc_curve(fpr, tpr, roc_auc, chosen_threshold, chosen_f1, fpr_chosen, tpr_chosen)
-st.pyplot(roc_plot)
