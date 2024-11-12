@@ -162,6 +162,86 @@ for col in columns_to_evaluate:
         # Display the ROC curve
         st.pyplot(plt)
 
+import pandas as pd
+import streamlit as st
+
+# Read the CSV file
+df = pd.read_csv('Hallucination Confidence Score (3).csv')
+
+# Convert 'Hallucination Confidence Score' from string percentage to float
+df['Hallucination Confidence Score'] = df['Hallucination Confidence Score'].str.rstrip('%').astype('float') / 100
+
+# Dropdown for selecting score range
+range_options = {
+    '0%': (0.0, 0.0),
+    '10% - 20%': (0.10, 0.20),
+    '20% - 30%': (0.20, 0.30),
+    '30% - 40%': (0.30, 0.40),
+    '40% - 50%': (0.40, 0.50),
+    '50% - 60%': (0.50, 0.60),
+    '60% - 70%': (0.60, 0.70),
+    '70% - 80%': (0.70, 0.80),
+    '80% - 90%': (0.80, 0.90),
+    '90% - 100%': (0.90, 1.0)
+}
+
+# Display the dropdown in the sidebar
+selected_range = st.selectbox('Select Hallucination Confidence Score Range:', list(range_options.keys()))
+
+# Filter the dataframe based on the selected range
+min_score, max_score = range_options[selected_range]
+filtered_df = df[(df['Hallucination Confidence Score'] >= min_score) & (df['Hallucination Confidence Score'] <= max_score)]
+
+# Set the page size to 5 reviews per page
+page_size = 5
+
+# Initialize session state for pagination (if it doesn't exist)
+if 'page_number' not in st.session_state:
+    st.session_state['page_number'] = 0
+
+# Function to get the current page of reviews
+def get_paginated_data(df, page_number, page_size):
+    start_idx = page_number * page_size
+    end_idx = start_idx + page_size
+    return df.iloc[start_idx:end_idx]
+
+# Function to display reviews
+def display_reviews(df):
+    for i, row in df.iterrows():
+        st.subheader(f"Review {i + 1}")
+        st.write(f"**Review:** {row['Review Text Original']}")
+        st.write(f"**Annotation:** {row['Annotated Text']}")
+        st.write(f"**Description:** {row['Description Original']}")
+
+        # Highlighted and right-aligned Hallucination Confidence Score
+        st.markdown(f"""
+            <div style='text-align: right; font-size: 20px; color: red; font-weight: bold;'>
+                Hallucination Confidence Score: {row['Hallucination Confidence Score'] * 100:.2f}%
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+
+# Get the current page's data based on the filtered dataframe
+paginated_df = get_paginated_data(filtered_df, st.session_state['page_number'], page_size)
+
+# Display the current page of reviews
+display_reviews(paginated_df)
+
+# Add "Next" and "Previous" buttons for pagination
+col1, col2, col3 = st.columns([1, 1, 1])
+
+# Only show the "Previous" button if we're beyond the first page
+if st.session_state['page_number'] > 0:
+    if col1.button("Previous"):
+        st.session_state['page_number'] -= 1
+
+# Only show the "Next" button if there are more reviews to display
+if len(filtered_df) > (st.session_state['page_number'] + 1) * page_size:
+    if col3.button("Next"):
+        st.session_state['page_number'] += 1
+
+
 ##HALLUCINATION CONFIDENCE SCORES 
 
 import pandas as pd
