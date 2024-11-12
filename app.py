@@ -306,21 +306,3 @@ with col2:
 st.markdown(f"### Optimal Thresholds: `{optimal_thresholds}`")
 st.markdown(f"### Maximum F1 Score: `{max_f1:.4f}`")
 
-# Add zoom-in view in an expander section
-with st.expander("🔍 Zoom in on ROC Curve (Top-Left Corner)"):
-    fig_zoom, ax_zoom = plt.subplots(figsize=(4, 2), dpi=100)
-    ax_zoom.plot(fpr, tpr, label='ROC Curve (Zoomed)', color='#1f77b4', lw=2)
-    
-    # Highlight optimal points in the zoomed view
-    for idx in optimal_indices:
-        ax_zoom.scatter(fpr[idx], tpr[idx], color='red', edgecolor='black', s=50, zorder=5)
-    
-    ax_zoom.set_xlim(0, 0.2)  # Zoom in on the top-left corner (adjust as needed)
-    ax_zoom.set_ylim(0.8, 1)
-    ax_zoom.set_xlabel('False Positive Rate (FPR)')
-    ax_zoom.set_ylabel('True Positive Rate (TPR)')
-    ax_zoom.set_title('Zoomed-in ROC Curve (Top-Left)', fontsize=12, fontweight='bold')
-    ax_zoom.legend()
-    ax_zoom.grid(visible=True, color='#ccc', linestyle='--', linewidth=0.5)
-    
-    st.pyplot(fig_zoom)
