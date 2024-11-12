@@ -282,7 +282,7 @@ col1, col2, col3 = st.columns([1, 2, 1])  # Center the plot with smaller middle 
 
 with col2:  # Place the plot in the center column
     # Plot ROC curve with smaller size
-    fig, ax = plt.subplots(figsize=(4, 2), dpi=100)
+    fig, ax = plt.subplots(figsize=(8, 4), dpi=100)
     ax.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='b')
 
     # Mark the points of the optimal thresholds on the ROC curve
