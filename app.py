@@ -277,27 +277,50 @@ max_f1 = max(f1_scores)
 optimal_indices = [i for i, f1 in enumerate(f1_scores) if f1 == max_f1]
 optimal_thresholds = thresholds[optimal_indices]
 
-# Use Streamlit columns to make the plot smaller and centered
-col1, col2, col3 = st.columns([1, 2, 1])  # Center the plot with smaller middle column
+# Use Streamlit columns to center the plot
+col1, col2, col3 = st.columns([1, 2, 1])
 
-with col2:  # Place the plot in the center column
-    # Plot ROC curve with smaller size
-    fig, ax = plt.subplots(figsize=(8, 4), dpi=100)
-    ax.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='b')
+with col2:
+    # Plot ROC curve with smaller size and enhanced styling
+    fig, ax = plt.subplots(figsize=(4, 2), dpi=100)
+    ax.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='#1f77b4', lw=2)  # Blue line with thicker width
 
-    # Mark the points of the optimal thresholds on the ROC curve
+    # Mark the points of the optimal thresholds on the ROC curve with red markers
     for idx in optimal_indices:
-        ax.scatter(fpr[idx], tpr[idx], color='red', label=f'Optimal Threshold ({thresholds[idx]:.2f})')
+        ax.scatter(fpr[idx], tpr[idx], color='red', edgecolor='black', s=50, zorder=5,
+                   label=f'Optimal Threshold ({thresholds[idx]:.2f})' if idx == optimal_indices[0] else "")
 
-    # Add labels and title
+    # Add labels, title, and border
     ax.set_xlabel('False Positive Rate (FPR)')
     ax.set_ylabel('True Positive Rate (TPR)')
-    ax.set_title('ROC Curve (TPR vs FPR)')
+    ax.set_title('ROC Curve (TPR vs FPR)', fontsize=14, fontweight='bold', color='#333')
     ax.legend()
+    ax.grid(visible=True, color='#ccc', linestyle='--', linewidth=0.5)  # Light grid for readability
+    fig.patch.set_edgecolor('grey')
+    fig.patch.set_linewidth(1.5)  # Border around the figure
 
     # Display the plot in Streamlit
     st.pyplot(fig)
 
-# Display the optimal thresholds and maximum F1 score in Streamlit
-st.write(f'Optimal Thresholds: {optimal_thresholds}')
-st.write(f'Maximum F1 Score: {max_f1:.4f}')
+# Display optimal thresholds and F1 score with formatting
+st.markdown(f"### Optimal Thresholds: `{optimal_thresholds}`")
+st.markdown(f"### Maximum F1 Score: `{max_f1:.4f}`")
+
+# Add zoom-in view in an expander section
+with st.expander("🔍 Zoom in on ROC Curve (Top-Left Corner)"):
+    fig_zoom, ax_zoom = plt.subplots(figsize=(4, 2), dpi=100)
+    ax_zoom.plot(fpr, tpr, label='ROC Curve (Zoomed)', color='#1f77b4', lw=2)
+    
+    # Highlight optimal points in the zoomed view
+    for idx in optimal_indices:
+        ax_zoom.scatter(fpr[idx], tpr[idx], color='red', edgecolor='black', s=50, zorder=5)
+    
+    ax_zoom.set_xlim(0, 0.2)  # Zoom in on the top-left corner (adjust as needed)
+    ax_zoom.set_ylim(0.8, 1)
+    ax_zoom.set_xlabel('False Positive Rate (FPR)')
+    ax_zoom.set_ylabel('True Positive Rate (TPR)')
+    ax_zoom.set_title('Zoomed-in ROC Curve (Top-Left)', fontsize=12, fontweight='bold')
+    ax_zoom.legend()
+    ax_zoom.grid(visible=True, color='#ccc', linestyle='--', linewidth=0.5)
+    
+    st.pyplot(fig_zoom)
