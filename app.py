@@ -277,22 +277,26 @@ max_f1 = max(f1_scores)
 optimal_indices = [i for i, f1 in enumerate(f1_scores) if f1 == max_f1]
 optimal_thresholds = thresholds[optimal_indices]
 
-# Plot ROC curve with smaller size
-fig, ax = plt.subplots(figsize=(5, 3), dpi=100)
-ax.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='b')
+# Use Streamlit columns to make the plot smaller and centered
+col1, col2, col3 = st.columns([1, 2, 1])  # Center the plot with smaller middle column
 
-# Mark the points of the optimal thresholds on the ROC curve
-for idx in optimal_indices:
-    ax.scatter(fpr[idx], tpr[idx], color='red', label=f'Optimal Threshold ({thresholds[idx]:.2f})')
+with col2:  # Place the plot in the center column
+    # Plot ROC curve with smaller size
+    fig, ax = plt.subplots(figsize=(4, 2), dpi=100)
+    ax.plot(fpr, tpr, label=f'ROC Curve (AUC = {roc_auc:.4f})', color='b')
 
-# Add labels and title
-ax.set_xlabel('False Positive Rate (FPR)')
-ax.set_ylabel('True Positive Rate (TPR)')
-ax.set_title('ROC Curve (TPR vs FPR)')
-ax.legend()
+    # Mark the points of the optimal thresholds on the ROC curve
+    for idx in optimal_indices:
+        ax.scatter(fpr[idx], tpr[idx], color='red', label=f'Optimal Threshold ({thresholds[idx]:.2f})')
 
-# Display the plot in Streamlit
-st.pyplot(fig)
+    # Add labels and title
+    ax.set_xlabel('False Positive Rate (FPR)')
+    ax.set_ylabel('True Positive Rate (TPR)')
+    ax.set_title('ROC Curve (TPR vs FPR)')
+    ax.legend()
+
+    # Display the plot in Streamlit
+    st.pyplot(fig)
 
 # Display the optimal thresholds and maximum F1 score in Streamlit
 st.write(f'Optimal Thresholds: {optimal_thresholds}')
