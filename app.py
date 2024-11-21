@@ -211,7 +211,7 @@ def display_reviews(df):
         st.subheader(f"Review {i + 1}")
         st.write(f"**Review:** {row['Review Text Original']}")
         st.write(f"**Annotation:** {row['Annotated Text']}")
-        st.write(f"**Description:** {row['Description Original']}")
+        st.write(f"**AI Explanation:** {row['Description Original']}")
 
         # Highlighted and right-aligned Hallucination Confidence Score
         st.markdown(f"""
