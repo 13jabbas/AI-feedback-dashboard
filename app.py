@@ -214,6 +214,9 @@ def display_reviews(df):
         st.write(f"**Action:** {row['Action']}")
         st.write(f"**AI Explanation:** {row['Description Original']}")
 
+
+        print(df['Action'].head())
+
         # Highlighted and right-aligned Hallucination Confidence Score
         st.markdown(f"""
             <div style='text-align: right; font-size: 20px; color: red; font-weight: bold;'>
