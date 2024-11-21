@@ -1,4 +1,4 @@
-streamlit run your_app.py
+
 
 # PACKAGES
 
@@ -209,14 +209,12 @@ def get_paginated_data(df, page_number, page_size):
 
 #Fucntion to display reviews
 def display_reviews(df):
-    # Ensure missing "Action" values are handled
-    df['Action'] = df['Action'].fillna("N/A")
     
     for i, row in df.iterrows():
         st.subheader(f"Review {i + 1}")
         st.write(f"**Review:** {row['Review Text Original']}")
         st.write(f"**Annotation:** {row['Annotated Text']}")
-        st.write(f"**Action:** {row['Action']}")  # Fixed typo from 'Ation' to 'Action'
+        st.write(f"**Action:** {row['Action']}") 
         st.write(f"**AI Explanation:** {row['Description Original']}")
 
 
