@@ -1,3 +1,5 @@
+streamlit run your_app.py
+
 # PACKAGES
 
 import streamlit as st
