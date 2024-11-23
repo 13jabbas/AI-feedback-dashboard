@@ -117,6 +117,33 @@ if selected_entity in results:
     # Display the gauge cluster
     st.plotly_chart(fig)
 
+# Compute overall Macro F1 Score
+overall_f1 = np.mean([metrics['Macro F1 Score'] for metrics in results.values()])
+
+# Add a section for the overall score
+st.header("Overall Metrics")
+
+# Display overall F1 Score as a gauge
+overall_fig = go.Figure()
+
+# Overall F1 Score Gauge
+overall_fig.add_trace(go.Indicator(
+    mode="gauge+number",
+    value=overall_f1,
+    title={'text': "Overall F1 Score"},
+    gauge={'axis': {'range': [0, 1]}},
+    domain={'x': [0, 1], 'y': [0, 1]}
+))
+
+# Update layout for overall score
+overall_fig.update_layout(title_text="Overall F1 Score for All Entities", height=300)
+
+# Display the gauge
+st.plotly_chart(overall_fig)
+
+
+
+
 # Create a DataFrame for ranking metrics
 ranked_metrics = pd.DataFrame(results).T
 ranked_metrics['Average'] = ranked_metrics[['Macro F1 Score', 'Precision (Macro)', 'Recall (Macro)']].mean(axis=1)
