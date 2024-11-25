@@ -78,8 +78,7 @@ for col in columns_to_evaluate:
 # Compute overall Macro F1 Score
 overall_f1 = np.mean([metrics['Macro F1 Score'] for metrics in results.values()])
 
-# Add a section for the overall score
-st.header("Overall Metrics")
+
 
 # Display overall F1 Score as a gauge
 overall_fig = go.Figure()
@@ -93,8 +92,7 @@ overall_fig.add_trace(go.Indicator(
     domain={'x': [0, 1], 'y': [0, 1]}
 ))
 
-# Update layout for overall score
-overall_fig.update_layout(title_text="Overall F1 Score for All Entities", height=300)
+
 
 # Display the gauge
 st.plotly_chart(overall_fig)
