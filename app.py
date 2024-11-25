@@ -151,7 +151,7 @@ ranked_metrics['Average'] = ranked_metrics[['Macro F1 Score', 'Precision (Macro)
 ranked_metrics = ranked_metrics.sort_values(by='Average', ascending=False)
 
 # Leaderboard display
-st.subheader("Entity Leaderboard")
+st.subheader("Entity Leaderboard - Average of F1, Recall and Precision")
 for index, row in ranked_metrics.iterrows():
     st.write(f"**{index}:** Average Score = {row['Average']:.2f}")
 
