@@ -305,7 +305,7 @@ st.markdown(f"""
             margin-bottom: 10px;
         }}
     </style>
-    <div class="title">Percentage of Hallucinations Generated</div>
+    <div class="title">Percentage of Hallucinations Generated In V1</div>
     <div class="circle">{hallucination_percentage}%</div>
 """, unsafe_allow_html=True)
 
