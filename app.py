@@ -276,6 +276,8 @@ if st.session_state['page_number'] > 0:
 if len(filtered_df) > (st.session_state['page_number'] + 1) * page_size:
     if col3.button("Next"):
         st.session_state['page_number'] += 1
+
+
 ##PERCENTAGE OF HALLUCINATIONS
 import streamlit as st
 
@@ -283,9 +285,9 @@ import streamlit as st
 hallucination_percentage = 68.05
 
 # Add the title and percentage in a circular style
-st.markdown("""
+st.markdown(f"""
     <style>
-        .circle {
+        .circle {{
             width: 80px;
             height: 80px;
             border-radius: 50%;
@@ -296,16 +298,16 @@ st.markdown("""
             align-items: center;
             font-size: 20px;
             font-weight: bold;
-        }
-        .title {
+        }}
+        .title {{
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 10px;
-        }
+        }}
     </style>
     <div class="title">Percentage of Hallucinations Generated</div>
-    <div class="circle">{}</div>
-""".format(hallucination_percentage), unsafe_allow_html=True)
+    <div class="circle">{hallucination_percentage}%</div>
+""", unsafe_allow_html=True)
 
 
 ##HALLUCINATION CONFIDENCE SCORES 
