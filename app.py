@@ -11,6 +11,10 @@ import plotly.express as px
 # Page selection dropdown
 page = st.selectbox("Select a page", ["Page 1", "Page 2"])
 
+
+def page_1_content():
+    st.title("Page 1")
+
 # Load data
 @st.cache_data
 def load_data():
