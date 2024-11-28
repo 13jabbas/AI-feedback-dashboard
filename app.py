@@ -17,16 +17,6 @@ st.set_page_config(layout="wide")
 
 
 
-  
-
-# Create a page selector
-page = st.selectbox("Choose a page", ["LLMV1", "LLMV2"])
-
-# Page 1 content
-if page == "LLMV1":
-    st.title("LLMV1")
-    st.write("V1")
-
 
 
 
@@ -318,33 +308,7 @@ st.markdown(f"""
     <div class="circle">{hallucination_percentage}%</div>
 """, unsafe_allow_html=True)
 
-# Set the percentage value
-hallucination_percentage = 11.69
 
-# Add the title and percentage in a circular style
-st.markdown(f"""
-    <style>
-        .circle {{
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: #1f77b4;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            font-weight: bold;
-        }}
-        .title {{
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }}
-    </style>
-    <div class="title">Percentage of Hallucinations Generated In V2</div>
-    <div class="circle">{hallucination_percentage}%</div>
-""", unsafe_allow_html=True)
 ##HALLUCINATION CONFIDENCE SCORES 
 
 import pandas as pd
@@ -413,8 +377,4 @@ st.markdown(f"### Maximum F1 Score: {max_f1:.4f}")
 
 
 
-# Ensure there is no syntax error and the conditional statement starts here
-elif page == "LLMV2":
-    st.title("LLMV2")
-    st.write("V2")
-    st.text_area("Example Text Area for Page 2")
+
