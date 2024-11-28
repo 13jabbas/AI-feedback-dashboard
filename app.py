@@ -13,17 +13,8 @@ import plotly.express as px
 
 import streamlit as st
 # Add a big title to the page
-st.title("Fine Tuned LLM Round 1")
-st.markdown(
-    """
-    <a href="https://v2-ai-feedbackdashboard-9piby8wbfpcel9z5hdkmkn.streamlit.app/" target="_blank">
-        <button style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-            View V2LLM Results
-        </button>
-    </a>
-    """,
-    unsafe_allow_html=True
-)
+st.title("Finetuned LLM Round 1")
+
 # Load data
 @st.cache_data
 def load_data():
@@ -374,5 +365,14 @@ st.markdown(f"### Optimal Thresholds: {optimal_thresholds}")
 st.markdown(f"### Maximum F1 Score: {max_f1:.4f}")
 
 
-
+st.markdown(
+    """
+    <a href="https://v2-ai-feedbackdashboard-9piby8wbfpcel9z5hdkmkn.streamlit.app/" target="_blank">
+        <button style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+            View V2LLM Results
+        </button>
+    </a>
+    """,
+    unsafe_allow_html=True
+)
 
