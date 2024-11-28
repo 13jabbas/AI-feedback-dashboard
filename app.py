@@ -370,3 +370,20 @@ st.markdown(f"### Maximum F1 Score: {max_f1:.4f}")
 
 
 
+
+# Define the content for Page 2
+def page_2_content():
+    st.title("Page 2")
+
+
+
+# Call the function based on page selection
+if page == "Page 1":
+    page_1_content()
+elif page == "Page 2":
+    page_2_content()
+
+
+
+
+
