@@ -9,7 +9,10 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 
-
+# Page 1 function
+def page_1():
+    st.title("Page 1")
+    st.write("Welcome to Page 1!")
 
 
 # Set page configuration
@@ -378,3 +381,20 @@ st.markdown(f"### Maximum F1 Score: {max_f1:.4f}")
 
 
 
+# Page 2 function
+def page_2():
+    st.title("Page 2")
+    st.write("Welcome to Page 2!")
+    # Add content for page 2 here
+    st.text("This is content for page 2.")
+
+
+
+# Sidebar for navigation
+page = st.sidebar.radio("Select a page", ("Page 1", "Page 2"))
+
+# Render content based on selected page
+if page == "Page 1":
+    page_1()
+elif page == "Page 2":
+    page_2()
