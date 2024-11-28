@@ -8,10 +8,7 @@ from sklearn.preprocessing import label_binarize, LabelEncoder
 import plotly.graph_objects as go
 import plotly.express as px
 
-#SETTING FIRST HOME PAGE 
-# Initialize session state for page navigation
-if "page" not in st.session_state:
-    st.session_state.page = "Home"  # Start on the Home page
+
 
 
 
@@ -19,9 +16,7 @@ if "page" not in st.session_state:
 st.set_page_config(layout="wide")
 
 
-# SETTING PAGE ONE WITH V1 CODE
-    if st.session_state.page == "Home":
-    # This is where you write all the code for Page 1
+
   
 
 
@@ -411,23 +406,4 @@ st.markdown(f"### Maximum F1 Score: {max_f1:.4f}")
 
 
 
-
-#CODE TO GO TO PAGE 2
-  st.title("Home Page")
-    st.write("Welcome to the Home Page!")
-
-# Add a button to navigate to Page 2
-    if st.button("Go to Page 2"):
-        st.session_state.page = "Page2"
-
-
-#CODE FOR PAGE 2 WHICH IS LLM V2
-elif st.session_state.page == "Page2":
-    # This is where you write all the code for Page 2
-    st.title("Page 2")
-    st.write("Welcome to Page 2!")
-
-    # Add a button to navigate back to Home Page
-    if st.button("Go Back to Home"):
-        st.session_state.page = "Home"
 
