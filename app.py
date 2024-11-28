@@ -137,13 +137,13 @@ if selected_entity in results:
 
 # Create a DataFrame for ranking metrics
 ranked_metrics = pd.DataFrame(results).T
-ranked_metrics['Average'] = ranked_metrics[['Macro F1 Score', 'Precision (Macro)', 'Recall (Macro)']].mean(axis=1)
+ranked_metrics['Average'] = ranked_metrics[['Macro F1 Score']].mean(axis=1)
 ranked_metrics = ranked_metrics.sort_values(by='Average', ascending=False)
 
 # Leaderboard display
-st.subheader("Entity Leaderboard - Average of F1, Recall and Precision")
+st.subheader("Entity Leaderboard ")
 for index, row in ranked_metrics.iterrows():
-    st.write(f"**{index}:** Average Score = {row['Average']:.2f}")
+    st.write(f"**{index}:** F1 = {row['Average']:.2f}")
 
 # Plot the ROC curves for each entity
 for col in columns_to_evaluate:
