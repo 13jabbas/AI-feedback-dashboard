@@ -12,12 +12,13 @@ import plotly.express as px
 
 
 import streamlit as st
-
+# Add a big title to the page
+st.title("LLM V1 Results")
 st.markdown(
     """
     <a href="https://v2-ai-feedbackdashboard-9piby8wbfpcel9z5hdkmkn.streamlit.app/" target="_blank">
         <button style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-            V2LLM Results
+            View V2LLM Results
         </button>
     </a>
     """,
