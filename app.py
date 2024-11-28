@@ -8,7 +8,8 @@ from sklearn.preprocessing import label_binarize, LabelEncoder
 import plotly.graph_objects as go
 import plotly.express as px
 
-
+# Page selection dropdown
+page = st.selectbox("Select a page", ["Page 1", "Page 2"])
 
 # Load data
 @st.cache_data
