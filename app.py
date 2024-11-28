@@ -387,6 +387,7 @@ def page_2():
     st.write("Welcome to Page 2!")
     # Add content for page 2 here
     st.text("This is content for page 2.")
+    st.text("Some specific content for Page 2")
 
 
 
