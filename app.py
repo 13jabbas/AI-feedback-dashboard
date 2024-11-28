@@ -13,6 +13,12 @@ import plotly.express as px
 if "page" not in st.session_state:
     st.session_state.page = "Home"  # Start on the Home page
 
+
+
+# Set page configuration
+st.set_page_config(layout="wide")
+
+
 # SETTING PAGE ONE WITH V1 CODE
 if st.session_state.page == "Home":
     # This is where you write all the code for Page 1
@@ -21,10 +27,8 @@ if st.session_state.page == "Home":
 
 
 
-# Set page configuration
-st.set_page_config(layout="wide")
 
-# SIDE BAR LLM VERSION SELECTOR
+
 
 
 # Load data
