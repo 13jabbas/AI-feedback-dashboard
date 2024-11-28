@@ -19,7 +19,18 @@ st.set_page_config(layout="wide")
 
   
 
+# Create a page selector
+page = st.selectbox("Choose a page", ["Home", "Page 2"])
 
+# Page 1 content
+if page == "Home":
+    st.title("Home Page")
+    st.write("Welcome to the Home Page!")
+
+# Page 2 content
+elif page == "Page 2":
+    st.title("Page 2")
+    st.write("Welcome to the second page!")
 
 
 
