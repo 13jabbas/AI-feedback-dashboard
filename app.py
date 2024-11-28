@@ -27,10 +27,7 @@ if page == "LLMV1":
     st.title("LLMV1")
     st.write("V1")
 
-# Page 2 content
-elif page == "LLMV2":
-    st.title("LLMV2")
-    st.write("V2")
+
 
 
 
@@ -417,4 +414,8 @@ st.markdown(f"### Maximum F1 Score: {max_f1:.4f}")
 
 
 
-
+# Page 2 content
+elif page == "LLMV2":
+    st.title("LLMV2")
+    st.write("V2")
+    st.text_area("Example Text Area for Page 2")
