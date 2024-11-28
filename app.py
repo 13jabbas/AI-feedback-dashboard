@@ -20,7 +20,7 @@ st.set_page_config(layout="wide")
 
 
 # SETTING PAGE ONE WITH V1 CODE
-if st.session_state.page == "Home":
+    if st.session_state.page == "Home":
     # This is where you write all the code for Page 1
   
 
