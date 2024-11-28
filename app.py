@@ -103,7 +103,7 @@ if selected_entity in results:
         value=metrics['Macro F1 Score'],
         title={'text': "F1 Score"},
         gauge={'axis': {'range': [0, 1]}},
-        domain={'x': [0, 0.33], 'y': [0, 1]}
+        domain={'x': [0, 0.3], 'y': [0, 1]}  # Adjusted width and position
     ))
 
     # Precision Gauge
@@ -112,7 +112,7 @@ if selected_entity in results:
         value=metrics['Precision (Macro)'],
         title={'text': "Precision"},
         gauge={'axis': {'range': [0, 1]}},
-        domain={'x': [0.34, 0.67], 'y': [0, 1]}
+        domain={'x': [0.35, 0.65], 'y': [0, 1]}  # Adjusted width and position
     ))
 
     # Recall Gauge
@@ -121,15 +121,18 @@ if selected_entity in results:
         value=metrics['Recall (Macro)'],
         title={'text': "Recall"},
         gauge={'axis': {'range': [0, 1]}},
-        domain={'x': [0.68, 1], 'y': [0, 1]}
+        domain={'x': [0.7, 1], 'y': [0, 1]}  # Adjusted width and position
     ))
 
     # Update layout
-    fig.update_layout(title_text=f"Metrics for {selected_entity}", height=300)
+    fig.update_layout(
+        title_text=f"Metrics for {selected_entity}",
+        height=400,  # Increased height for better spacing
+        margin={'l': 20, 'r': 20, 't': 40, 'b': 20},  # Adjusted margins
+    )
 
     # Display the gauge cluster
-    st.plotly_chart(fig)
-
+    st.plotly_chart(fig, use_container_width=True)
 
 
 
